@@ -1,4 +1,4 @@
-package com.tarkil.hongkongbus
+package HongKongBusBackEnd
 
 import khttp.responses.Response
 import khttp.structures.cookie.CookieJar
