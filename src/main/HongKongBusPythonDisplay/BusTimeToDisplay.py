@@ -1,4 +1,4 @@
-class busTimeToDisplay:
+class BusTimeToDisplay:
     busNumber = 0
     arrivalTime = ''
     distance = ''
@@ -15,7 +15,7 @@ class busTimeToDisplay:
         self.color = color
         
     def __str__(self):
-        return ("Bus " + str(self.busNumber) + " @ " + self.distance + " - " + self.arrivalTime)
+        return "Bus " + str(self.busNumber) + " @ " + self.distance + " - " + self.arrivalTime
     
     def __repr__(self):
-        return ("Bus " + str(self.busNumber) + " @ " + self.distance + " - " + self.arrivalTime)
+        return "Bus " + str(self.busNumber) + " @ " + self.distance + " - " + self.arrivalTime
