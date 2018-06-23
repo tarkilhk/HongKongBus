@@ -59,12 +59,12 @@ def RefreshBusTimeData():
     FoundArrivalTimes = []
     while True:
         try:
-            response = requests.get('http://localhost:8080/getNextBusesTimes')
+            response = requests.get('https://hong-kong-bus.herokuapp.com/getNextBusesTimes')
             data = response.json()
             for obj in data:
                 FoundArrivalTimes.append(
                     BusTimeToDisplay.BusTimeToDisplay(obj.get('busNumber'), obj.get('arrivalTime'), obj.get('distance'),
-                                                      DarkRed))
+                                                      DarkRed if obj.get('busNumber') == 11 else LightRed))
             myLogger.info("RefreshBusTimeData while True Loop started")
 
         except:
