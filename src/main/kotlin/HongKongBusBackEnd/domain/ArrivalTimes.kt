@@ -5,8 +5,8 @@ import HongKongBusBackEnd.infra.getNextTimesForPreviouslySetBusStop
 import HongKongBusBackEnd.infra.loadFirstWebPageAndReturnCookies
 import HongKongBusBackEnd.infra.setBusStopDetails
 import khttp.structures.cookie.CookieJar
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import javax.annotation.PostConstruct
 
 @Component
 class ArrivalTimes {
@@ -49,19 +49,16 @@ class ArrivalTimes {
         }
     }
 
-    @PostConstruct
-    fun startTheLoop(){
+    @Scheduled(fixedDelay = 20_000)
+    fun startTheLoop() {
         val myOriginalCookies: CookieJar = loadFirstWebPageAndReturnCookies()
-//        while (true) {
-            for(desiredBusStop in this.desiredBusStops.getAll()){
-                this.refreshDataFor(myOriginalCookies, desiredBusStop)
-            }
-            println("Final Data :")
-            for(busStopTime in this.getAll()){
-                println(busStopTime)
-            }
-//            Thread.sleep(20000)
-//        }
+        for (desiredBusStop in this.desiredBusStops.getAll()) {
+            this.refreshDataFor(myOriginalCookies, desiredBusStop)
+        }
+        println("Final Data :")
+        for (busStopTime in this.getAll()) {
+            println(busStopTime)
+        }
     }
 
     fun refreshDataFor(myOriginalCookies:CookieJar, busStopConfig: BusStopConfig){

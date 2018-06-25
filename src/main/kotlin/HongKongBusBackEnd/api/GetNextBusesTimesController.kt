@@ -8,14 +8,12 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class GetNextBusesTimesController(){
+class GetNextBusesTimesController(
+        val arrivalTimes: ArrivalTimes){
 
-    @Autowired
-    lateinit var arrivalTimes: ArrivalTimes
 
-    @RequestMapping("/getNextBusesTimes")
+    @RequestMapping("/nextBusesTimes")
     fun getNextBusesTimes():MutableList<BusStopTime> {
-        arrivalTimes.startTheLoop()
         return arrivalTimes.getAll()
     }
 }
