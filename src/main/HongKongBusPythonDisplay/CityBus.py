@@ -60,7 +60,7 @@ def RefreshBusTimeData():
 
     FoundArrivalTimes = []
     while True:
-        response = requests.get('http://localhost:8080/getNextBusesTimes')
+        response = requests.get('http://localhost:8080/nextBusesTimes')
         data = response.json()
         for obj in data:
             print(obj.get('busNumber'))
