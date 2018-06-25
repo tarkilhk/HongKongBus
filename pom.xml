@@ -4,12 +4,12 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.tarkil</groupId>
-	<artifactId>demo</artifactId>
+	<artifactId>hong-kong-bus</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>demo</name>
-	<description>Demo project for Spring Boot</description>
+	<name>hong-kong-bus</name>
+	<description>Hong Kong Bus</description>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -96,6 +96,28 @@
 						<version>${kotlin.version}</version>
 					</dependency>
 				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
+				<executions>
+					<execution>
+						<id>deploy-python-to-pi</id>
+						<configuration>
+							<target>
+								<exec executable="cmd.exe"
+									  spawn="true">
+									<arg value="/c"/>
+									<arg value="${project.basedir}\CopyCityBusPyToPi.bat"/>
+								</exec>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

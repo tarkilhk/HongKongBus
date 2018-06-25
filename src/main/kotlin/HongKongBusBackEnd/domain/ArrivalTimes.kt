@@ -14,6 +14,7 @@ class ArrivalTimes {
     private val arrivalTimesStatic = mutableListOf<BusStopTime>()
 
     private val desiredBusStops = DesiredBusStops()
+    private val initialCookies: CookieJar = loadFirstWebPageAndReturnCookies()
 
     init{
         arrivalTimesStatic.add(BusStopTime(11,"11:11","5.0km"))
@@ -50,10 +51,9 @@ class ArrivalTimes {
     }
 
     @Scheduled(fixedDelay = 20_000)
-    fun startTheLoop() {
-        val myOriginalCookies: CookieJar = loadFirstWebPageAndReturnCookies()
+    fun refreshDataLoop() {
         for (desiredBusStop in this.desiredBusStops.getAll()) {
-            this.refreshDataFor(myOriginalCookies, desiredBusStop)
+            this.refreshDataFor(desiredBusStop)
         }
         println("Final Data :")
         for (busStopTime in this.getAll()) {
@@ -61,10 +61,10 @@ class ArrivalTimes {
         }
     }
 
-    fun refreshDataFor(myOriginalCookies:CookieJar, busStopConfig: BusStopConfig){
-        setBusStopDetails(myOriginalCookies,busStopConfig)
+    fun refreshDataFor(busStopConfig: BusStopConfig){
+        setBusStopDetails(initialCookies,busStopConfig)
         this.clearPreviousBusTimesForBusNumber(busStopConfig.busNumber)
-        this.addSeveral(getNextTimesForPreviouslySetBusStop(myOriginalCookies,busStopConfig.busNumber))
+        this.addSeveral(getNextTimesForPreviouslySetBusStop(initialCookies,busStopConfig.busNumber))
     }
 
 

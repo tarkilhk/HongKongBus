@@ -1,8 +1,7 @@
 import requests
-import sys
-import os
+import sys,  os
 from bs4 import BeautifulSoup
-# from rgbmatrix import Adafruit_RGBmatrix
+from rgbmatrix import Adafruit_RGBmatrix
 from PIL import ImageFont
 from PIL import Image
 from PIL import ImageDraw
@@ -11,12 +10,10 @@ import threading
 import psutil
 import logging
 from logging.handlers import RotatingFileHandler
-import BusStopConfig
 import BusTimeToDisplay
 
 # Define running folder
-# ProgramFolder = "/home/pi/Downloads/rpi-rgb-led-matrix-master/"
-ProgramFolder = ""
+ProgramFolder = "/home/pi/Downloads/rpi-rgb-led-matrix-master/"
 
 # Logging mechanism
 myLogger = logging.getLogger('RotatingLogs')
@@ -30,14 +27,19 @@ myLogger.setLevel(logging.INFO)
 DarkRed = (50, 0, 0)
 LightRed = (100, 0, 0)
 DarkWhite = (100, 100, 100)
-PreciousCyan = (102,245,173)
-
-# Bus Line configs -- TODO read a list from fileConfig
-BusStopConfigs = [BusStopConfig.BusStopConfig(511,  'Loong Fung Terrace, Tai Hang Road',  '002529',  14, LightRed),  \
-                  BusStopConfig.BusStopConfig(11,  'Loong Fung Terrace, Tai Hang Road',  '002529',  32, DarkRed)]
+PreciousCyan = (102, 245, 173)
 
 # Global variable to be used between the 2 threads
 NextArrivalTimes = []
+
+def GetDisplayColor(busNumber):
+    displayColor = (0,0,0)
+    if busNumber == 11:
+        displayColor = DarkRed
+    if busNumber == 511:
+        displayColor = LightRed
+    return displayColor
+
 
 def GetCityBusProcess():
     for myProcess in psutil.process_iter():
@@ -60,33 +62,96 @@ def RefreshBusTimeData():
 
     FoundArrivalTimes = []
     while True:
-        response = requests.get('http://localhost:8080/nextBusesTimes')
-        data = response.json()
-        for obj in data:
-            print(obj.get('busNumber'))
-            print(obj.get('arrivalTime'))
-            print(obj.get('distance'))
-        myLogger.info("RefreshBusTimeData while True Loop started")
         try:
-            print("toto")
+            FoundArrivalTimes = []
+            response = requests.get('https://hong-kong-bus.herokuapp.com/nextBusesTimes')
+            data = response.json()
+            for obj in data:
+                FoundArrivalTimes.append(
+                    BusTimeToDisplay.BusTimeToDisplay(obj.get('busNumber'), obj.get('arrivalTime'), obj.get('distance'), GetDisplayColor('busNumber')))
+            myLogger.info("RefreshBusTimeData while True Loop started")
+
         except:
             myLogger.exception("Couldn't GET the BusTimeData")
 
-        # finally:
-        #     if len(FoundArrivalTimes)>0:
-        #         NextArrivalTimes = sorted(FoundArrivalTimes, key=lambda myBusTime: myBusTime.arrivalTime24H)
-        # myLogger.info("RefreshBusTimeData sleeping for 20 seconds")
-        time.sleep(20)
-        myLogger.info("RefreshBusTimeData SLEEP DONE - End of my loop, let's go to the next one; NextArrivalTimes = %s",  NextArrivalTimes)
+        finally:
+            if len(FoundArrivalTimes) > 0:
+                NextArrivalTimes = sorted(FoundArrivalTimes, key=lambda myBusTime: myBusTime.arrivalTime)
+
 
 def KeepDisplayUpdated():
     global NextArrivalTimes
+    # Rows and chain length are both required parameters:
+    matrix = Adafruit_RGBmatrix(32, 2)
+
     localNextArrivalTimesToAvoidConcurrencyIssues = []
+    
+    myLogger.info("Starting KeepDisplayUpdated")
+    fontSize = 10
+    #font = ImageFont.truetype("/usr/share/fonts/truetype/freefont/FreeSans.ttf", fontSize)
+    #font = ImageFont.truetype("/home/pi/Downloads/5by7.ttf", fontSize)
+    #font = ImageFont.truetype("/home/pi/Downloads/ufonts.com_subway-ticker.ttf", fontSize)
+    font = ImageFont.truetype("/home/pi/Downloads/LEDCounter7.ttf", fontSize)
+    displaying = 'arrivalTime'
+    
+    while True:
+        myImage = Image.new("RGB", (64, 32), "black")
+        myDraw = ImageDraw.Draw(myImage)
+        myDraw.text((19, 0), time.strftime('%H:%M', time.localtime()), DarkWhite, font=font)
 
-    localNextArrivalTimesToAvoidConcurrencyIssues = NextArrivalTimes
-    for busTimeToDisplay in localNextArrivalTimesToAvoidConcurrencyIssues:
-        print(BusTimeToDisplay.BusTimeToDisplay(busTimeToDisplay.busNumber,busTimeToDisplay.arrivalTime,busTimeToDisplay.distance,DarkRed))
+        localNextArrivalTimesToAvoidConcurrencyIssues = NextArrivalTimes
+        
+        if len(localNextArrivalTimesToAvoidConcurrencyIssues)==0:
+            myDraw.text((3,  fontSize), "No bus",  DarkRed, font=font)
+        elif len(localNextArrivalTimesToAvoidConcurrencyIssues)==1:
+            if displaying == 'arrivalTime':
+                myDraw.text((3,  fontSize), localNextArrivalTimesToAvoidConcurrencyIssues[0].arrivalTime,  localNextArrivalTimesToAvoidConcurrencyIssues[0].color, font=font)
+            else:
+                myDraw.text((3,  fontSize), localNextArrivalTimesToAvoidConcurrencyIssues[0].distance,  localNextArrivalTimesToAvoidConcurrencyIssues[0].color, font=font)
+        elif len(localNextArrivalTimesToAvoidConcurrencyIssues)==2:
+            if displaying == 'arrivalTime':
+                myDraw.text((3,  fontSize), localNextArrivalTimesToAvoidConcurrencyIssues[0].arrivalTime,  localNextArrivalTimesToAvoidConcurrencyIssues[0].color, font=font)
+                myDraw.text((35,  fontSize), localNextArrivalTimesToAvoidConcurrencyIssues[1].arrivalTime,  localNextArrivalTimesToAvoidConcurrencyIssues[1].color, font=font)
+            else:
+                myDraw.text((3,  fontSize), localNextArrivalTimesToAvoidConcurrencyIssues[0].distance,  localNextArrivalTimesToAvoidConcurrencyIssues[0].color, font=font)
+                myDraw.text((35,  fontSize), localNextArrivalTimesToAvoidConcurrencyIssues[1].distance,  localNextArrivalTimesToAvoidConcurrencyIssues[1].color, font=font)
+        elif len(localNextArrivalTimesToAvoidConcurrencyIssues)==3:
+            if displaying == 'arrivalTime':
+                myDraw.text((3,  fontSize), localNextArrivalTimesToAvoidConcurrencyIssues[0].arrivalTime,  localNextArrivalTimesToAvoidConcurrencyIssues[0].color, font=font)
+                myDraw.text((35,  fontSize), localNextArrivalTimesToAvoidConcurrencyIssues[1].arrivalTime,  localNextArrivalTimesToAvoidConcurrencyIssues[1].color, font=font)
+                myDraw.text((3,  fontSize*2), localNextArrivalTimesToAvoidConcurrencyIssues[2].arrivalTime,  localNextArrivalTimesToAvoidConcurrencyIssues[2].color, font=font)
+            else:
+                myDraw.text((3,  fontSize), localNextArrivalTimesToAvoidConcurrencyIssues[0].distance,  localNextArrivalTimesToAvoidConcurrencyIssues[0].color, font=font)
+                myDraw.text((35,  fontSize), localNextArrivalTimesToAvoidConcurrencyIssues[1].distance,  localNextArrivalTimesToAvoidConcurrencyIssues[1].color, font=font)
+                myDraw.text((3,  fontSize*2), localNextArrivalTimesToAvoidConcurrencyIssues[2].distance,  localNextArrivalTimesToAvoidConcurrencyIssues[2].color, font=font)
+        else:
+            if displaying == 'arrivalTime':
+                myDraw.text((3,  fontSize), localNextArrivalTimesToAvoidConcurrencyIssues[0].arrivalTime,  localNextArrivalTimesToAvoidConcurrencyIssues[0].color, font=font)
+                myDraw.text((35,  fontSize), localNextArrivalTimesToAvoidConcurrencyIssues[1].arrivalTime,  localNextArrivalTimesToAvoidConcurrencyIssues[1].color, font=font)
+                myDraw.text((3,  fontSize*2), localNextArrivalTimesToAvoidConcurrencyIssues[2].arrivalTime,  localNextArrivalTimesToAvoidConcurrencyIssues[2].color, font=font)
+                myDraw.text((35,  fontSize*2), localNextArrivalTimesToAvoidConcurrencyIssues[3].arrivalTime,  localNextArrivalTimesToAvoidConcurrencyIssues[3].color, font=font)
+            else:
+                myDraw.text((3,  fontSize), localNextArrivalTimesToAvoidConcurrencyIssues[0].distance,  localNextArrivalTimesToAvoidConcurrencyIssues[0].color, font=font)
+                myDraw.text((35,  fontSize), localNextArrivalTimesToAvoidConcurrencyIssues[1].distance,  localNextArrivalTimesToAvoidConcurrencyIssues[1].color, font=font)
+                myDraw.text((3,  fontSize*2), localNextArrivalTimesToAvoidConcurrencyIssues[2].distance,  localNextArrivalTimesToAvoidConcurrencyIssues[2].color, font=font)
+                myDraw.text((35,  fontSize*2), localNextArrivalTimesToAvoidConcurrencyIssues[3].distance,  localNextArrivalTimesToAvoidConcurrencyIssues[3].color, font=font)
 
+        myLogger.info("DisplayUpdated : Before RGBMatrix.Clear")
+        matrix.Clear()
+
+        myLogger.info("DisplayUpdated : Before RGBMatrix.SetImage")
+        matrix.SetImage(myImage.im.id, 0, 0)
+
+        if displaying == 'arrivalTime':
+            myLogger.debug("KeepDisplayUpdated sleeping for 3 seconds")
+            time.sleep(3)
+            myLogger.debug("KeepDisplayUpdated arrivalTime SLEEP DONE")
+            displaying='distance'
+        else:
+            myLogger.debug("KeepDisplayUpdated sleeping for 1 second")
+            time.sleep(1)
+            myLogger.debug("KeepDisplayUpdated distance SLEEP DONE")
+            displaying='arrivalTime'
 
 def ThreadManager():
     #wakes up every 5 minutes to check if the 2 threads are running

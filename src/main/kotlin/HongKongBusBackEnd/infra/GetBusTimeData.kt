@@ -30,7 +30,7 @@ fun setBusStopDetails(myCookies: CookieJar, desiredBusStop: BusStopConfig): Int{
             }
         }
     }
-    val payload = mapOf("ssid" to mySessionId, "info" to "${desiredBusStop.stopId}||${desiredBusStop.busNumber}-CEF-1||${desiredBusStop.stopNumber}||O")
+    val payload = mapOf("ssid" to mySessionId, "info" to "${desiredBusStop.stopId}||${desiredBusStop.busNumber}-CEF-1||${desiredBusStop.stopNumberOnBusLine}||O")
 
     val response: Response = khttp.get("https://mobile.nwstbus.com.hk/nwp3/set_etasession.php", params = payload, cookies = myCookies)
     return response.statusCode
