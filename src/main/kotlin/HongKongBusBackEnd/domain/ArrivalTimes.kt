@@ -67,7 +67,7 @@ class ArrivalTimes {
     fun refreshDataFor(myOriginalCookies:CookieJar, busStopConfig: BusStopConfig){
         setBusStopDetails(myOriginalCookies,busStopConfig)
         this.clearPreviousBusTimesForBusNumber(busStopConfig.busNumber)
-        this.addSeveral(getNextTimesForPreviouslySetBusStop(myOriginalCookies))
+        this.addSeveral(getNextTimesForPreviouslySetBusStop(myOriginalCookies,busStopConfig.busNumber))
     }
 
 

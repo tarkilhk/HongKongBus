@@ -36,7 +36,7 @@ fun setBusStopDetails(myCookies: CookieJar, desiredBusStop: BusStopConfig): Int{
     return response.statusCode
 }
 
-fun getNextTimesForPreviouslySetBusStop(myCookies: CookieJar): MutableList<BusStopTime>{
+fun getNextTimesForPreviouslySetBusStop(myCookies: CookieJar, busStopNumber: Int): MutableList<BusStopTime>{
     val myOwnCookies = mutableMapOf("PPFARE" to "1")
     var mySessionId = ""
     var arrivalTimes = mutableListOf<BusStopTime>()
@@ -46,6 +46,7 @@ fun getNextTimesForPreviouslySetBusStop(myCookies: CookieJar): MutableList<BusSt
             "ETWEBID" -> myOwnCookies["ETWEBID"] = myCookie.value.split(";")[0]
             "PHPSESSID" -> myOwnCookies["PHPSESSID"] = myCookie.value.split(";")[0]
             "PPFARE" -> myOwnCookies["PPFARE"] = myCookie.value.split(";")[0]
+            "LANG" -> myOwnCookies["LANG"] = myCookie.value.split(";")[0]
             else -> { // Note the block
                 myOwnCookies[myCookie.key] = myCookie.value.split(";")[0]
                 mySessionId = myCookie.key
@@ -64,7 +65,7 @@ fun getNextTimesForPreviouslySetBusStop(myCookies: CookieJar): MutableList<BusSt
         for (myRow in tableRows) {
             val myCells = myRow.select("td").filter { it.childNodeSize()== 1 }
             if(myCells.size==3){
-                arrivalTimes.add(BusStopTime(11,myCells.elementAt(0).text(),myCells.elementAt(2).text()))
+                arrivalTimes.add(BusStopTime(busStopNumber,myCells.elementAt(0).text(),myCells.elementAt(2).text()))
             }
             else{
                 //table found but no 3 td in it ?
