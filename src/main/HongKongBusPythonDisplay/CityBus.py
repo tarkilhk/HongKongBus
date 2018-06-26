@@ -38,9 +38,9 @@ NextArrivalTimes = []
 
 def GetDisplayColor(busNumber):
     displayColor = (0, 0, 0)
-    if busNumber == '11':
+    if busNumber == 11:
         displayColor = DarkRed
-    if busNumber == '511':
+    if busNumber == 511:
         displayColor = LightRed
     return displayColor
 
@@ -52,7 +52,8 @@ def GetCityBusProcess():
                 if ProgramFolder + 'CityBus.py' in myProcess.cmdline() or 'CityBus.py' in myProcess.cmdline():
                     if myProcess.pid == os.getppid():
                         myLogger.debug(
-                            "Found sudo, python, and CityBuys.py process, but only current process, no already running one")
+                            "Found sudo, python, and CityBuys.py process, but only current process, no already "
+                            "running one")
                     else:
                         myLogger.debug("Found CityBuys.py process")
                         return myProcess
@@ -75,7 +76,7 @@ def RefreshBusTimeData():
             for obj in data:
                 FoundArrivalTimes.append(
                     BusTimeToDisplay.BusTimeToDisplay(obj.get('busNumber'), obj.get('arrivalTime'), obj.get('distance'),
-                                                      GetDisplayColor('busNumber')))
+                                                      GetDisplayColor(obj.get('busNumber'))))
             myLogger.info("RefreshBusTimeData while True Loop started")
 
         except:
