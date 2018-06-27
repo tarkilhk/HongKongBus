@@ -14,8 +14,7 @@ fun loadFirstWebPageAndReturnCookies(): CookieJar {
     return(response.cookies)
 }
 
-//TODO return error code
-fun setBusStopDetails(myCookies: CookieJar, desiredBusStop: BusStopConfig): Int{
+fun setBusStopDetailsAndGetResponseCode(myCookies: CookieJar, desiredBusStop: BusStopConfig): Int{
     val myOwnCookies = mutableMapOf("PPFARE" to "1")
     var mySessionId = ""
 
@@ -39,7 +38,7 @@ fun setBusStopDetails(myCookies: CookieJar, desiredBusStop: BusStopConfig): Int{
 fun getNextTimesForPreviouslySetBusStop(myCookies: CookieJar, busStopNumber: Int): MutableList<BusStopTime>{
     val myOwnCookies = mutableMapOf("PPFARE" to "1")
     var mySessionId = ""
-    var arrivalTimes = mutableListOf<BusStopTime>()
+    val arrivalTimes = mutableListOf<BusStopTime>()
 
     for(myCookie in myCookies) {
         when (myCookie.key) {
@@ -65,7 +64,7 @@ fun getNextTimesForPreviouslySetBusStop(myCookies: CookieJar, busStopNumber: Int
         for (myRow in tableRows) {
             val myCells = myRow.select("td").filter { it.childNodeSize()== 1 }
             if(myCells.size==3){
-                arrivalTimes.add(BusStopTime(busStopNumber,myCells.elementAt(0).text(),myCells.elementAt(2).text()))
+                arrivalTimes.add(BusStopTime(busStopNumber, myCells.elementAt(0).text(),myCells.elementAt(2).text()))
             }
             else{
                 //table found but no 3 td in it ?

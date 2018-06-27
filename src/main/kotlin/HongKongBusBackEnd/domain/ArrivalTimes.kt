@@ -3,7 +3,7 @@ package HongKongBusBackEnd.domain
 import HongKongBusBackEnd.infra.DesiredBusStops
 import HongKongBusBackEnd.infra.getNextTimesForPreviouslySetBusStop
 import HongKongBusBackEnd.infra.loadFirstWebPageAndReturnCookies
-import HongKongBusBackEnd.infra.setBusStopDetails
+import HongKongBusBackEnd.infra.setBusStopDetailsAndGetResponseCode
 import khttp.structures.cookie.CookieJar
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -23,7 +23,6 @@ class ArrivalTimes {
     }
 
     fun getAll():MutableList<BusStopTime>{
-        println("size : ${arrivalTimes.size}")
         return this.arrivalTimes
     }
 
@@ -41,7 +40,6 @@ class ArrivalTimes {
 
     fun addOne(busStopTime: BusStopTime){
         arrivalTimes.add(busStopTime)
-        println("I've added $busStopTime")
     }
 
     fun addSeveral(busStopTimes: MutableList<BusStopTime>){
@@ -55,16 +53,21 @@ class ArrivalTimes {
         for (desiredBusStop in this.desiredBusStops.getAll()) {
             this.refreshDataFor(desiredBusStop)
         }
-        println("Final Data :")
-        for (busStopTime in this.getAll()) {
-            println(busStopTime)
-        }
     }
 
     fun refreshDataFor(busStopConfig: BusStopConfig){
-        setBusStopDetails(initialCookies,busStopConfig)
-        this.clearPreviousBusTimesForBusNumber(busStopConfig.busNumber)
-        this.addSeveral(getNextTimesForPreviouslySetBusStop(initialCookies,busStopConfig.busNumber))
+        val responseCode:Int = setBusStopDetailsAndGetResponseCode(initialCookies, busStopConfig)
+
+//        sleep(5000)
+
+        if (responseCode == 200) {
+            val result = getNextTimesForPreviouslySetBusStop(initialCookies, busStopConfig.busNumber)
+            this.clearPreviousBusTimesForBusNumber(busStopConfig.busNumber)
+            this.addSeveral(result)
+        }
+        else {
+            println("Error setting BusStopDetails : code $responseCode")
+         }
     }
 
 
