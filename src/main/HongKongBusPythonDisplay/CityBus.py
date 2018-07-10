@@ -1,6 +1,5 @@
 import requests
 import sys, os
-from rgbmatrix import Adafruit_RGBmatrix
 from PIL import ImageFont
 from PIL import Image
 from PIL import ImageDraw
@@ -17,6 +16,7 @@ if os.name == 'nt':
     ProgramFolder = 'C:\\Users\\rober\\ideaProjects\\HongKongBus\\src\\main\\HongKongBusPythonDisplay\\'
 else:
     ProgramFolder = "/home/pi/Downloads/rpi-rgb-led-matrix-master/"
+    from rgbmatrix import Adafruit_RGBmatrix
 
 # Logging mechanism
 myLogger = logging.getLogger('RotatingLogs')
@@ -79,13 +79,26 @@ def RefreshBusTimeData():
                                                       GetDisplayColor(obj.get('busNumber'))))
             myLogger.info("RefreshBusTimeData while True Loop started")
 
-        except:
+        except requests.ConnectionError:
+            NextArrivalTimes.append(
+                BusTimeToDisplay.BusTimeToDisplay(0,'OFFLN','OFFLN',DarkRed)
+            )
+            myLogger.info('Connection error while refreshing BusTimeData')
+            time.sleep(60)
+        except requests.exceptions.Timeout:
+            NextArrivalTimes.append(
+                BusTimeToDisplay.BusTimeToDisplay(0,'TMOUT','TMOUT',DarkRed)
+            )
+            myLogger.info('Time out while refreshing BusTimeData')
+            time.sleep(60)
+        except requests.exceptions.RequestException as err:
             myLogger.exception("Couldn't GET the BusTimeData")
+            myLogger.exception(err)
 
-        finally:
-            if len(FoundArrivalTimes) > 0:
-                NextArrivalTimes = sorted(FoundArrivalTimes,
-                                          key=lambda myBusTime: myBusTime.arrivalTime.replace("00:", "24:"))
+        if len(FoundArrivalTimes) > 0:
+            NextArrivalTimes = sorted(FoundArrivalTimes,
+                                      key=lambda myBusTime: myBusTime.arrivalTime.replace("00:", "24:"))
+            time.sleep(30)
 
 
 def KeepDisplayUpdated():
@@ -109,6 +122,8 @@ def KeepDisplayUpdated():
         myDraw.text((19, 0), time.strftime('%H:%M', time.localtime()), DarkWhite, font=font)
 
         localNextArrivalTimesToAvoidConcurrencyIssues = NextArrivalTimes
+        for nextArrivalTime in NextArrivalTimes :
+            myLogger.debug(nextArrivalTime)
 
         if len(localNextArrivalTimesToAvoidConcurrencyIssues) == 0:
             myDraw.text((3, fontSize), "No bus", DarkRed, font=font)
