@@ -221,8 +221,8 @@ try:
 
     if os.name=='nt':
         myThreadManagerThread.start()
-        print("CityBus started")
-        myLogger.warning("CityBus ThreadManager Started")
+        print("CityBus NT started")
+        myLogger.warning("CityBus NT ThreadManager Started")
     else:
         myProcess = GetCityBusProcess()
         if len(sys.argv) < 2:
