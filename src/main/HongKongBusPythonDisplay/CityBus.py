@@ -71,7 +71,7 @@ def RefreshBusTimeData():
     while True:
         try:
             FoundArrivalTimes = []
-            response = requests.get('https://hong-kong-bus.herokuapp.com/nextBusesTimes')
+            response = requests.get('https://hong-kong-bus.herokuapp.com/nextBusesTimesFor?userName=pi')
             data = response.json()
             for obj in data:
                 FoundArrivalTimes.append(

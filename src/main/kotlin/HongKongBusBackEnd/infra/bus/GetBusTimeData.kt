@@ -1,7 +1,7 @@
-package HongKongBusBackEnd.infra
+package HongKongBusBackEnd.infra.bus
 
-import HongKongBusBackEnd.domain.BusStopConfig
-import HongKongBusBackEnd.domain.BusStopTime
+import HongKongBusBackEnd.domain.Bus.BusStopConfig
+import HongKongBusBackEnd.domain.Bus.BusStopTime
 import khttp.responses.Response
 import khttp.structures.cookie.CookieJar
 import org.jsoup.Jsoup
@@ -14,7 +14,7 @@ fun loadFirstWebPageAndReturnCookies(): CookieJar {
     return(response.cookies)
 }
 
-fun setBusStopDetailsAndGetResponseCode(myCookies: CookieJar, desiredBusStop: BusStopConfig): Int{
+fun setBusStopDetailsAndGetResponseCode(myCookies: CookieJar, chosenBusStop: BusStopConfig): Int{
     val myOwnCookies = mutableMapOf("PPFARE" to "1")
     var mySessionId = ""
 
@@ -29,7 +29,7 @@ fun setBusStopDetailsAndGetResponseCode(myCookies: CookieJar, desiredBusStop: Bu
             }
         }
     }
-    val payload = mapOf("ssid" to mySessionId, "info" to "${desiredBusStop.stopId}||${desiredBusStop.busNumber}-CEF-1||${desiredBusStop.stopNumberOnBusLine}||O")
+    val payload = mapOf("ssid" to mySessionId, "info" to "${chosenBusStop.busStopUniqueId}||${chosenBusStop.busNumber}-CEF-1||${chosenBusStop.stopNumberOnBusLine}||O")
 
     val response: Response = khttp.get("https://mobile.nwstbus.com.hk/nwp3/set_etasession.php", params = payload, cookies = myCookies)
     return response.statusCode
@@ -64,7 +64,7 @@ fun getNextTimesForPreviouslySetBusStop(myCookies: CookieJar, busStopNumber: Int
         for (myRow in tableRows) {
             val myCells = myRow.select("td").filter { it.childNodeSize()== 1 }
             if(myCells.size==3){
-                arrivalTimes.add(BusStopTime(busStopNumber, myCells.elementAt(0).text(),myCells.elementAt(2).text()))
+                arrivalTimes.add(BusStopTime(busStopNumber, myCells.elementAt(0).text(), myCells.elementAt(2).text()))
             }
             else{
                 //table found but no 3 td in it ?
@@ -74,7 +74,7 @@ fun getNextTimesForPreviouslySetBusStop(myCookies: CookieJar, busStopNumber: Int
     }
     else{
         //No bus found
-        println("No Table Rows")
+//        println("No Table Rows for bus $busStopNumber")
     }
     return(arrivalTimes)
 }
