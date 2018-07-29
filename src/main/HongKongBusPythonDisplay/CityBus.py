@@ -71,7 +71,7 @@ def RefreshBusTimeData():
     while True:
         try:
             FoundArrivalTimes = []
-            response = requests.get('https://hong-kong-bus.herokuapp.com/nextBusesTimesFor?userName=pi')
+            response = requests.get('https://hong-kong-bus.herokuapp.com/nextBusesTimesFor?sessionId=1')
             data = response.json()
             for obj in data:
                 FoundArrivalTimes.append(
@@ -95,10 +95,10 @@ def RefreshBusTimeData():
             myLogger.exception("Couldn't GET the BusTimeData")
             myLogger.exception(err)
 
-        if len(FoundArrivalTimes) > 0:
-            NextArrivalTimes = sorted(FoundArrivalTimes,
-                                      key=lambda myBusTime: myBusTime.arrivalTime.replace("00:", "24:"))
-            time.sleep(30)
+        # if len(FoundArrivalTimes) > 0:
+        NextArrivalTimes = sorted(FoundArrivalTimes,
+                                  key=lambda myBusTime: myBusTime.arrivalTime.replace("00:", "24:"))
+        time.sleep(30)
 
 
 def KeepDisplayUpdated():

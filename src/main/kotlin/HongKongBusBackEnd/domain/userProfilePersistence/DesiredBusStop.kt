@@ -17,6 +17,9 @@ data class DesiredBusStop (
 
         val stopNumberOnBusLine: Int,
 
+        //TODO add default config to load when user connects
+//        val isDefault : Boolean,
+
         @ManyToMany(mappedBy = "desiredBusStops")
 //        @ManyToMany(fetch = FetchType.EAGER, mappedBy = "desiredBusStops")
         val users: List<User> = mutableListOf<User>()

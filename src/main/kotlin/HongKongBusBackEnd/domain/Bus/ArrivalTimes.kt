@@ -14,8 +14,12 @@ class ArrivalTimes(var chosenBusStops : MutableList<BusStopConfig>) {
         chosenBusStops.clear()
     }
 
-    fun addDesiredBusStop(newChosenBusStop: BusStopConfig) {
+    fun addOneDesiredBusStop(newChosenBusStop: BusStopConfig) {
         chosenBusStops.add(newChosenBusStop)
+    }
+
+    fun addSeveralDesiredBusStop(newChosenBusStops: MutableList<BusStopConfig>) {
+        chosenBusStops.addAll(newChosenBusStops)
     }
 
     fun getAll():MutableList<BusStopTime>{

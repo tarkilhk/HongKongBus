@@ -48,10 +48,16 @@ data class User (
 
     fun getAllChosenBusStopsForGroup(name: String) : MutableList<BusStopConfig>
     {
-        val desiredBusStops = this.desiredBusStops.filter{it.shortName==name}.toMutableList()
         val chosenBusStops = mutableListOf<BusStopConfig>()
-        for(desiredBustStop in desiredBusStops) {
-            chosenBusStops.add(BusStopConfig(desiredBustStop.busNumber,desiredBustStop.busStopUniqueId,desiredBustStop.stopNumberOnBusLine))
+        var nameToQuery = name
+        if(nameToQuery == "") {
+            //This happens when user logins, and doesn't specify a default config
+            //TODO : load default config from DB instead, after isDefault has been implemented
+            nameToQuery = "CastleDown"
+        }
+        val desiredBusStops = this.desiredBusStops.filter { it.shortName == nameToQuery }.toMutableList()
+        for (desiredBustStop in desiredBusStops) {
+            chosenBusStops.add(BusStopConfig(desiredBustStop.busNumber, desiredBustStop.busStopUniqueId, desiredBustStop.stopNumberOnBusLine))
         }
         return chosenBusStops
     }
