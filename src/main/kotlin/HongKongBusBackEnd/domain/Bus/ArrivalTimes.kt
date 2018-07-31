@@ -4,9 +4,16 @@ import HongKongBusBackEnd.infra.bus.getNextTimesForPreviouslySetBusStop
 import HongKongBusBackEnd.infra.bus.loadFirstWebPageAndReturnCookies
 import HongKongBusBackEnd.infra.bus.setBusStopDetailsAndGetResponseCode
 import khttp.structures.cookie.CookieJar
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.*
+
+
+
 
 class ArrivalTimes(var chosenBusStops : MutableList<BusStopConfig>) {
     private val arrivalTimes = mutableListOf<BusStopTime>()
+    private var lastRefreshTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
 
     private val initialCookies: CookieJar = loadFirstWebPageAndReturnCookies()
 
@@ -22,8 +29,15 @@ class ArrivalTimes(var chosenBusStops : MutableList<BusStopConfig>) {
         chosenBusStops.addAll(newChosenBusStops)
     }
 
-    fun getAll():MutableList<BusStopTime>{
-        return this.arrivalTimes
+    fun getSortedArrivalTimes(): List<BusStopTime> {
+        return this.arrivalTimes.sortedWith(compareBy(BusStopTime::arrivalTime))
+    }
+    
+    fun getResult(): HashMap<String, Any> {
+        val map = HashMap<String, Any>()
+        map["lastRefreshTime"] = this.lastRefreshTime
+        map["arrivalTimes"] = this.getSortedArrivalTimes()
+        return map
     }
 
     fun clearPreviousBusTimesForBusNumber(busNumber: Int){
@@ -57,6 +71,7 @@ class ArrivalTimes(var chosenBusStops : MutableList<BusStopConfig>) {
             val result = getNextTimesForPreviouslySetBusStop(initialCookies, chosenBusStop.busNumber)
             this.clearPreviousBusTimesForBusNumber(chosenBusStop.busNumber)
             this.addSeveral(result)
+            lastRefreshTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
         }
         else {
             println("Error setting BusStopDetails : code $responseCode")
