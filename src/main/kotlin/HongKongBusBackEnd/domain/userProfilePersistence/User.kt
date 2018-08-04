@@ -27,6 +27,10 @@ data class User (
                 "User id=$userId : $name")
     }
 
+    fun getUserId() : Long {
+        return this.userId
+    }
+
     fun getAllConfigBusStops() : MutableList<DesiredBusStop>
     {
         return this.desiredBusStops
@@ -49,7 +53,7 @@ data class User (
     fun getAllChosenBusStopsForGroup(name: String) : MutableList<BusStopConfig>
     {
         val chosenBusStops = mutableListOf<BusStopConfig>()
-        var nameToQuery = name
+        var nameToQuery: String = name
         if(nameToQuery == "") {
             //This happens when user logins, and doesn't specify a default config
             //TODO : load default config from DB instead, after isDefault has been implemented

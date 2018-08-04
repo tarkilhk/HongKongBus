@@ -80,17 +80,19 @@ def RefreshBusTimeData():
                                                       GetDisplayColor(obj.get('busNumber'))))
             myLogger.info("RefreshBusTimeData while True Loop started")
 
-        except requests.ConnectionError:
+        except requests.ConnectionError as err:
             NextArrivalTimes.append(
                 BusTimeToDisplay.BusTimeToDisplay(0,'OFFLN','OFFLN',DarkRed)
             )
             myLogger.info('Connection error while refreshing BusTimeData')
+            myLogger.exception(err)
             time.sleep(60)
-        except requests.exceptions.Timeout:
+        except requests.exceptions.Timeout as err:
             NextArrivalTimes.append(
                 BusTimeToDisplay.BusTimeToDisplay(0,'TMOUT','TMOUT',DarkRed)
             )
             myLogger.info('Time out while refreshing BusTimeData')
+            myLogger.exception(err)
             time.sleep(60)
         except requests.exceptions.RequestException as err:
             myLogger.exception("Couldn't GET the BusTimeData")

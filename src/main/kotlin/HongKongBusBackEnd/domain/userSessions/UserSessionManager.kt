@@ -21,51 +21,6 @@ class UserSessionManager(val userRepository: UserRepository) {
         this.userSessions.add(newUserSession)
         return newUserSession
     }
-
-//    fun addNewUserSession_ToDeprecate(userName : String, configGroupName : String) {
-//        val user = this.userRepository.findByName(userName).firstOrNull()
-////        user!!.desiredBusStops.size()
-//        if(user != null) {
-//            val chosenBusStops = user.getAllChosenBusStopsForGroup(configGroupName)
-//
-//            if(chosenBusStops.size != 0)
-//            {
-//                val newUserSession = UserSession(user, configGroupName)
-//                this.userSessions.add(newUserSession)
-//            }
-//            else {
-//                // TODO : no config exists in DB for this user
-//                println("No config exists in DB for user <$userName>, config <$configGroupName>")
-//            }
-//        }
-//        else {
-//            //TODO : what to do if I cannot find user in DB ??
-//            println("Cannot find user $userName in DB")
-//        }
-//    }
-
-    fun removeUserSession(userSessionToDelete: UserSession) {
-        userSessions.remove(userSessionToDelete)
-    }
-
-//    fun getArrivalTimesFor(myUser:User) : ArrivalTimes?{
-//        if(this.userSessions.size == 0) {
-//            return null
-//        }
-//        else {
-//            return this.userSessions.filter { it.user == myUser }.firstOrNull().arrivalTimes
-//        }
-//    }
-//
-//    fun getUser(userName : String) : User? {
-//        if(this.userSessions.size == 0) {
-//            return null
-//        }
-//        else {
-//            return this.userSessions.filter { it.user.name == userName }.firstOrNull().user
-//        }
-//    }
-
     fun getUserSessionForUserName(userName : String) : UserSession? {
         if(this.userSessions.size == 0) {
             return null
