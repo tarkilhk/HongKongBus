@@ -31,7 +31,7 @@ fun setBusStopDetailsAndGetResponseCode(myCookies: CookieJar, chosenBusStop: Bus
     }
     val payload = mapOf("ssid" to mySessionId, "info" to "${chosenBusStop.busStopUniqueId}||${chosenBusStop.busNumber}-CEF-1||${chosenBusStop.stopNumberOnBusLine}||O")
 
-    val response: Response = khttp.get("https://mobile.nwstbus.com.hk/nwp3/set_etasession.php", params = payload, cookies = myCookies)
+    val response: Response = khttp.get("https://mobile.nwstbus.com.hk/nwp3/auto_f4e2775471494a2fa5dca47c4a6f44b2.php", params = payload, cookies = myCookies)
     return response.statusCode
 }
 
@@ -54,7 +54,7 @@ fun getNextTimesForPreviouslySetBusStop(myCookies: CookieJar, busStopNumber: Int
     }
     val payload = mapOf("l" to "1","ssid" to mySessionId)
 
-    val response : Response = khttp.get("https://mobile.nwstbus.com.hk/nwp3/geteta.php", params= payload, cookies=myOwnCookies)
+    val response : Response = khttp.get("https://mobile.nwstbus.com.hk/nwp3/auto_2d8c3061cca24efd91c6259ee931a0da.php", params= payload, cookies=myOwnCookies)
     val message : String = response.text
 
     val resultingDocument : Document = Jsoup.parse(message)
