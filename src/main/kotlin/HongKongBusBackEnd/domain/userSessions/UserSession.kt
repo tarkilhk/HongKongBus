@@ -1,6 +1,6 @@
 package HongKongBusBackEnd.domain.userSessions
 
-import HongKongBusBackEnd.domain.Bus.ArrivalTimes
+import HongKongBusBackEnd.domain.bus.ArrivalTimes
 import HongKongBusBackEnd.domain.userProfilePersistence.User
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now

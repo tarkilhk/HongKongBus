@@ -1,21 +1,17 @@
-package HongKongBusBackEnd.domain.Bus
+package HongKongBusBackEnd.domain.bus
 
-import HongKongBusBackEnd.infra.bus.getNextTimesForPreviouslySetBusStop
-import HongKongBusBackEnd.infra.bus.loadFirstWebPageAndReturnCookies
-import HongKongBusBackEnd.infra.bus.setBusStopDetailsAndGetResponseCode
-import khttp.structures.cookie.CookieJar
+import HongKongBusBackEnd.domain.Bus.BusStopConfig
+import HongKongBusBackEnd.domain.Bus.BusStopTime
+import HongKongBusBackEnd.infra.bus.CityBusHelper
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
 
-
-
 class ArrivalTimes(var chosenBusStops : MutableList<BusStopConfig>) {
+    private val cityBusHelper = CityBusHelper()
     private val arrivalTimes = mutableListOf<BusStopTime>()
     private var lastRefreshTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
-
-    private val initialCookies: CookieJar = loadFirstWebPageAndReturnCookies()
 
     fun clearDesiredBusStops() {
         chosenBusStops.clear()
@@ -65,13 +61,19 @@ class ArrivalTimes(var chosenBusStops : MutableList<BusStopConfig>) {
     }
 
     fun refreshDataFor(chosenBusStop: BusStopConfig){
-        val responseCode:Int = setBusStopDetailsAndGetResponseCode(initialCookies, chosenBusStop)
+        val responseCode:MutableMap<String,String> = cityBusHelper.setBusStopDetailsAndGetResponseCode(chosenBusStop)
 
-        if (responseCode == 200) {
-            val result = getNextTimesForPreviouslySetBusStop(initialCookies, chosenBusStop.busNumber)
-            this.clearPreviousBusTimesForBusNumber(chosenBusStop.busNumber)
-            this.addSeveral(result)
-            lastRefreshTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+        if (responseCode["statusCode"].equals("200")) {
+            if(responseCode["body"].equals("OK")) {
+                val result = cityBusHelper.getNextTimesForPreviouslySetBusStop(chosenBusStop.busNumber)
+                this.clearPreviousBusTimesForBusNumber(chosenBusStop.busNumber)
+                this.addSeveral(result)
+                lastRefreshTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+            }
+            else {
+                //TODO : I couldn't set the bus stop details
+                println("Error setting BusStopDetails : 200, but result is not OK")
+            }
         }
         else {
             println("Error setting BusStopDetails : code $responseCode")
