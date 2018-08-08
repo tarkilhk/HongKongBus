@@ -21,7 +21,7 @@ class CityBusHelper {
         loadSetGetURLsFromFB()
     }
 
-    @Scheduled(cron="0 5 * * *")
+    @Scheduled(cron="0 5 * * *", zone="Asia/Hong_Kong")
     fun loadFirstWebPageAndSaveCookies() {
         val response: Response = khttp.get("https://mobile.nwstbus.com.hk/nwp3/?f=1&ds=ETA&l=1")
         val myOwnCookies = mutableMapOf("PPFARE" to "1")
@@ -41,7 +41,7 @@ class CityBusHelper {
         this.cookies = myOwnCookies
     }
 
-    fun loadSetGetURLsFromFB() {
+    private fun loadSetGetURLsFromFB() {
         var inMapClickAction = false
         var inShowETA = false
 
