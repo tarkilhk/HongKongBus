@@ -1,6 +1,8 @@
 package HongKongBusBackEnd.domain.userProfilePersistence
 
-import HongKongBusBackEnd.domain.Bus.BusStopConfig
+import javax.persistence.*
+
+import HongKongBusBackEnd.domain.bus.BusStopConfig
 import javax.persistence.*
 
 

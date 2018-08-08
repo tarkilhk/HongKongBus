@@ -1,6 +1,6 @@
 package HongKongBusBackEnd.api
 
-import HongKongBusBackEnd.domain.Bus.BusStopConfig
+import HongKongBusBackEnd.domain.bus.BusStopConfig
 import HongKongBusBackEnd.domain.userProfilePersistence.DesiredBusStop
 import HongKongBusBackEnd.domain.userProfilePersistence.User
 import HongKongBusBackEnd.infra.userProfilePersistence.DesiredBusStopRepository

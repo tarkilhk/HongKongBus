@@ -1,13 +1,15 @@
 package HongKongBusBackEnd.infra.bus
 
-import HongKongBusBackEnd.domain.Bus.BusStopConfig
-import HongKongBusBackEnd.domain.Bus.BusStopTime
+import HongKongBusBackEnd.domain.bus.BusStopConfig
+import HongKongBusBackEnd.domain.bus.BusStopTime
 import khttp.responses.Response
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
+import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.scheduling.annotation.Scheduled
 
-
+@EnableScheduling
 class CityBusHelper {
     private var urlOfSetBusStop = ""
     private var urlOfGetBusStopETA = ""
@@ -19,6 +21,7 @@ class CityBusHelper {
         loadSetGetURLsFromFB()
     }
 
+    @Scheduled(cron="0 5 * * *")
     fun loadFirstWebPageAndSaveCookies() {
         val response: Response = khttp.get("https://mobile.nwstbus.com.hk/nwp3/?f=1&ds=ETA&l=1")
         val myOwnCookies = mutableMapOf("PPFARE" to "1")

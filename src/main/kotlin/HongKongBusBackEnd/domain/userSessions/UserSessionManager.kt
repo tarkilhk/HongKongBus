@@ -38,20 +38,17 @@ class UserSessionManager(val userRepository: UserRepository) {
         }
     }
 
-//    @Scheduled(fixedDelay = 300_000)
-    @Scheduled(fixedDelay = 30_000)
+    @Scheduled(fixedDelay = 600_000)
     fun PruneSessionInactiveForMoreThan30Minutes(){
         val userSessionsToDelete = mutableListOf<UserSession>()
         for(userSession in userSessions) {
-            //TODO : Revert back to 30 minutes after code is tested
-//            if(userSession.lastQueryTime.plusSeconds(10).isBefore(LocalDateTime.now())) {
             if(userSession.lastQueryTime.plusMinutes(30).isBefore(LocalDateTime.now())) {
                 userSessionsToDelete.add(userSession)
             }
         }
 
         for(userSessionToDelete in userSessionsToDelete) {
-//            this.removeUserSession(userSessionToDelete)
+            this.removeUserSession(userSessionToDelete)
             //TODO : Actually delete userSession after code is tested
             println("${LocalDateTime.now()} - Pruned userSession ${userSessionToDelete.user.name} - ${userSessionToDelete.busStopGroupName} - Age : ${userSessionToDelete.lastQueryTime}")
             println("${this.userSessions.size} sessions remaining :")
@@ -59,6 +56,10 @@ class UserSessionManager(val userRepository: UserRepository) {
                 println("${mySession.user} - ${mySession.busStopGroupName} last activity at ${mySession.lastQueryTime}")
             }
         }
+    }
+
+    private fun removeUserSession(userSessionToDelete: UserSession) {
+        this.userSessions.remove(userSessionToDelete)
     }
 
     fun getUserSessionById(sessionId: String): UserSession? {
