@@ -41,6 +41,7 @@ class CityBusHelper {
         this.cookies = myOwnCookies
     }
 
+    @Scheduled(cron="5 5 * * *", zone="Asia/Hong_Kong")
     private fun loadSetGetURLsFromFB() {
         var inMapClickAction = false
         var inShowETA = false

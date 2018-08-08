@@ -30,11 +30,15 @@ class userController(val sessionManager: UserSessionManager){
     @RequestMapping("/user/configNames")
     fun getConfigNames(@RequestParam(value="sessionId") sessionId : String): MutableSet<String>
     {
-        //TODO protect from fake sessionId
-        val setOfConfigNames = mutableSetOf<String>()
-        for(desiredBusStop in sessionManager.getUserSessionById(sessionId)!!.user.getAllConfigBusStops()) {
-            setOfConfigNames.add(desiredBusStop.shortName)
+        if(sessionManager.sessionIdExists(sessionId)) {
+            val setOfConfigNames = mutableSetOf<String>()
+            for (desiredBusStop in sessionManager.getUserSessionById(sessionId)!!.user.getAllConfigBusStops()) {
+                setOfConfigNames.add(desiredBusStop.shortName)
+            }
+            return setOfConfigNames
         }
-        return setOfConfigNames
+        else {
+            return mutableSetOf("Session $sessionId does not exist, please restart app")
+        }
     }
 }

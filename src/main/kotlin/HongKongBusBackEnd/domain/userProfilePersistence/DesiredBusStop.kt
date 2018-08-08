@@ -21,7 +21,6 @@ data class DesiredBusStop (
 //        val isDefault : Boolean,
 
         @ManyToMany(mappedBy = "desiredBusStops")
-//        @ManyToMany(fetch = FetchType.EAGER, mappedBy = "desiredBusStops")
         val users: List<User> = mutableListOf<User>()
         ) {
     private constructor() : this(-1, "", 0, "", 0)

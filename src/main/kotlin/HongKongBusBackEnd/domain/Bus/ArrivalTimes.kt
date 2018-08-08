@@ -1,7 +1,5 @@
 package HongKongBusBackEnd.domain.bus
 
-import HongKongBusBackEnd.domain.bus.BusStopConfig
-import HongKongBusBackEnd.domain.bus.BusStopTime
 import HongKongBusBackEnd.infra.bus.CityBusHelper
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -71,11 +69,14 @@ class ArrivalTimes(var chosenBusStops : MutableList<BusStopConfig>) {
                 lastRefreshTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
             }
             else {
-                //TODO : I couldn't set the bus stop details
+                this.clearPreviousBusTimesForBusNumber(chosenBusStop.busNumber)
+                this.addSeveral(mutableListOf(BusStopTime(0,"Couldn't set BusStop","")))
                 println("Error setting BusStopDetails : 200, but result is not OK")
             }
         }
         else {
+            this.clearPreviousBusTimesForBusNumber(chosenBusStop.busNumber)
+            this.addSeveral(mutableListOf(BusStopTime(0,"Couldn't set BusStop","${responseCode["statusCode"]}")))
             println("Error setting BusStopDetails : code $responseCode")
          }
     }
