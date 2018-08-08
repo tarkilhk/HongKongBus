@@ -49,7 +49,6 @@ class UserSessionManager(val userRepository: UserRepository) {
 
         for(userSessionToDelete in userSessionsToDelete) {
             this.removeUserSession(userSessionToDelete)
-            //TODO : Actually delete userSession after code is tested
             println("${LocalDateTime.now()} - Pruned userSession ${userSessionToDelete.user.name} - ${userSessionToDelete.busStopGroupName} - Age : ${userSessionToDelete.lastQueryTime}")
             println("${this.userSessions.size} sessions remaining :")
             for(mySession in this.userSessions) {
@@ -73,8 +72,9 @@ class UserSessionManager(val userRepository: UserRepository) {
     fun sessionExistsFor(name: String): Boolean {
         return(userSessions.find { it.user.name == name } != null)
     }
+
+    fun sessionIdExists(sessionId: String): Boolean {
+        return( this.userSessions.find { it.uniqueSessionId == sessionId } != null)
+    }
 }
 
-private fun LocalDateTime.isBefore(now: LocalDateTime?): Boolean {
-    return isBefore(now)
-}
