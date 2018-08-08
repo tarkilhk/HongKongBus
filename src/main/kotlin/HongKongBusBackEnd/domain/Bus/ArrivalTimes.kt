@@ -1,7 +1,7 @@
 package HongKongBusBackEnd.domain.bus
 
-import HongKongBusBackEnd.domain.Bus.BusStopConfig
-import HongKongBusBackEnd.domain.Bus.BusStopTime
+import HongKongBusBackEnd.domain.bus.BusStopConfig
+import HongKongBusBackEnd.domain.bus.BusStopTime
 import HongKongBusBackEnd.infra.bus.CityBusHelper
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter

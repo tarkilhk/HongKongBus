@@ -1,4 +1,4 @@
-package HongKongBusBackEnd.domain.Bus
+package HongKongBusBackEnd.domain.bus
 
 import java.util.*
 
