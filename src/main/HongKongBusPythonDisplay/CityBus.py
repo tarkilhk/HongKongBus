@@ -81,19 +81,19 @@ def RefreshBusTimeData():
             myLogger.info("RefreshBusTimeData while True Loop started")
 
         except requests.ConnectionError as err:
-            NextArrivalTimes.append(
+            FoundArrivalTimes.append(
                 BusTimeToDisplay.BusTimeToDisplay(0,'OFFLN','OFFLN',DarkRed)
             )
             myLogger.info('Connection error while refreshing BusTimeData')
             myLogger.exception(err)
-            time.sleep(60)
+            time.sleep(30)
         except requests.exceptions.Timeout as err:
-            NextArrivalTimes.append(
+            FoundArrivalTimes.append(
                 BusTimeToDisplay.BusTimeToDisplay(0,'TMOUT','TMOUT',DarkRed)
             )
             myLogger.info('Time out while refreshing BusTimeData')
             myLogger.exception(err)
-            time.sleep(60)
+            time.sleep(30)
         except requests.exceptions.RequestException as err:
             myLogger.exception("Couldn't GET the BusTimeData")
             myLogger.exception(err)

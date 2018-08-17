@@ -42,7 +42,7 @@ class UserSessionManager(val userRepository: UserRepository) {
     fun PruneSessionInactiveForMoreThan30Minutes(){
         val userSessionsToDelete = mutableListOf<UserSession>()
         for(userSession in userSessions) {
-            if(userSession.lastQueryTime.plusMinutes(30).isBefore(LocalDateTime.now())) {
+            if(userSession.lastQueryTime.plusMinutes(30).isBefore(LocalDateTime.now()) && ! userSession.user.name.equals("pi")) {
                 userSessionsToDelete.add(userSession)
             }
         }
