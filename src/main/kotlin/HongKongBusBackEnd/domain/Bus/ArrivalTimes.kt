@@ -58,6 +58,11 @@ class ArrivalTimes(var chosenBusStops : MutableList<BusStopConfig>) {
         }
     }
 
+    fun reinitialiseCookiesAndSetGetURLsForAliveSessions() {
+        this.cityBusHelper.loadFirstWebPageAndSaveCookies()
+        this.cityBusHelper.loadSetGetURLsFromFB()
+    }
+
     fun refreshDataFor(chosenBusStop: BusStopConfig){
         val responseCode:MutableMap<String,String> = cityBusHelper.setBusStopDetailsAndGetResponseCode(chosenBusStop)
 
