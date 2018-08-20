@@ -97,11 +97,10 @@ def RefreshBusTimeData():
         except requests.exceptions.RequestException as err:
             myLogger.exception("Couldn't GET the BusTimeData")
             myLogger.exception(err)
-
-        # if len(FoundArrivalTimes) > 0:
-        NextArrivalTimes = sorted(FoundArrivalTimes,
-                                  key=lambda myBusTime: myBusTime.arrivalTime.replace("00:", "24:"))
-        time.sleep(30)
+        finally:
+            NextArrivalTimes = sorted(FoundArrivalTimes,
+                                      key=lambda myBusTime: myBusTime.arrivalTime.replace("00:", "24:"))
+            time.sleep(30)
 
 
 def KeepDisplayUpdated():

@@ -5,6 +5,7 @@ import HongKongBusBackEnd.infra.userProfilePersistence.UserRepository
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
+import java.time.ZoneId
 
 @Component
 class UserSessionManager(val userRepository: UserRepository) {
@@ -75,6 +76,15 @@ class UserSessionManager(val userRepository: UserRepository) {
 
     fun sessionIdExists(sessionId: String): Boolean {
         return( this.userSessions.find { it.uniqueSessionId == sessionId } != null)
+    }
+
+    @Scheduled(cron="0 0 5 * * *", zone="Asia/Hong_Kong")
+//    @Scheduled(fixedDelay = 20_000)
+    fun InitialiseCookiesAndSetGetURLsForAliveSessions() {
+        for(userSession in userSessions) {
+            userSession.arrivalTimes.reinitialiseCookiesAndSetGetURLsForAliveSessions()
+            println("${LocalDateTime.now(ZoneId.of("Asia/Hong_Kong"))} Refreshed Cookies and SetGetURLs for ${userSession.user.name}")
+        }
     }
 }
 

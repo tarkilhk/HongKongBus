@@ -6,10 +6,7 @@ import khttp.responses.Response
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
-import org.springframework.scheduling.annotation.EnableScheduling
-import org.springframework.scheduling.annotation.Scheduled
 
-@EnableScheduling
 class CityBusHelper {
     private var urlOfSetBusStop = ""
     private var urlOfGetBusStopETA = ""
@@ -21,7 +18,6 @@ class CityBusHelper {
         loadSetGetURLsFromFB()
     }
 
-    @Scheduled(cron="0 5 * * *", zone="Asia/Hong_Kong")
     fun loadFirstWebPageAndSaveCookies() {
         val response: Response = khttp.get("https://mobile.nwstbus.com.hk/nwp3/?f=1&ds=ETA&l=1")
         val myOwnCookies = mutableMapOf("PPFARE" to "1")
@@ -41,8 +37,7 @@ class CityBusHelper {
         this.cookies = myOwnCookies
     }
 
-    @Scheduled(cron="5 5 * * *", zone="Asia/Hong_Kong")
-    private fun loadSetGetURLsFromFB() {
+    fun loadSetGetURLsFromFB() {
         var inMapClickAction = false
         var inShowETA = false
 
