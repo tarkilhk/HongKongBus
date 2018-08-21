@@ -78,8 +78,8 @@ class UserSessionManager(val userRepository: UserRepository) {
         return( this.userSessions.find { it.uniqueSessionId == sessionId } != null)
     }
 
-    @Scheduled(cron="0 0 5 * * *", zone="Asia/Hong_Kong")
-//    @Scheduled(fixedDelay = 20_000)
+//    @Scheduled(cron="0 0 5 * * *", zone="Asia/Hong_Kong")
+    @Scheduled(fixedDelay = 120_000)
     fun InitialiseCookiesAndSetGetURLsForAliveSessions() {
         for(userSession in userSessions) {
             userSession.arrivalTimes.reinitialiseCookiesAndSetGetURLsForAliveSessions()
