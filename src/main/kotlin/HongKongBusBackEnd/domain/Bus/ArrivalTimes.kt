@@ -1,15 +1,20 @@
 package HongKongBusBackEnd.domain.bus
 
 import HongKongBusBackEnd.infra.bus.CityBusHelper
+import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
 
 
 class ArrivalTimes(var chosenBusStops : MutableList<BusStopConfig>) {
+    private val logger = LoggerFactory.getLogger(this.javaClass)
     private val cityBusHelper = CityBusHelper()
     private val arrivalTimes = mutableListOf<BusStopTime>()
-    private var lastRefreshTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+    private var lastRefreshTime = LocalDateTime.now(ZoneId.of("Asia/Hong_Kong")).format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+
+    private var IAlreadyHadA404ErrorAndImInMyRecursiveLoopToTryToFixIt = false
 
     fun clearDesiredBusStops() {
         chosenBusStops.clear()
@@ -64,25 +69,43 @@ class ArrivalTimes(var chosenBusStops : MutableList<BusStopConfig>) {
     }
 
     fun refreshDataFor(chosenBusStop: BusStopConfig){
-        val responseCode:MutableMap<String,String> = cityBusHelper.setBusStopDetailsAndGetResponseCode(chosenBusStop)
+        val responseMap:MutableMap<String,String> = cityBusHelper.setBusStopDetailsAndGetResponseCode(chosenBusStop)
 
-        if (responseCode["statusCode"].equals("200")) {
-            if(responseCode["body"].equals("OK")) {
+        if (responseMap["statusCode"].equals("200")) {
+            if(responseMap["body"].equals("OK")) {
+                logger.info("Successfully set the BusStopDetails for bus ${chosenBusStop.busNumber}")
+                this.IAlreadyHadA404ErrorAndImInMyRecursiveLoopToTryToFixIt = false
                 val result = cityBusHelper.getNextTimesForPreviouslySetBusStop(chosenBusStop.busNumber)
                 this.clearPreviousBusTimesForBusNumber(chosenBusStop.busNumber)
                 this.addSeveral(result)
-                lastRefreshTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
+                lastRefreshTime = LocalDateTime.now(ZoneId.of("Asia/Hong_Kong")).format(DateTimeFormatter.ofPattern("HH:mm:ss"))
             }
             else {
                 this.clearPreviousBusTimesForBusNumber(chosenBusStop.busNumber)
                 this.addSeveral(mutableListOf(BusStopTime(0,"Couldn't set BusStop","")))
-                println("Error setting BusStopDetails : 200, but result is not OK")
+                logger.error("Error setting BusStopDetails : 200, but result is not OK : ${responseMap["body"]}")
+            }
+        }
+        else if (responseMap["statusCode"].equals("404")) {
+            // 404 means page has not been found : SetGet URLs must have been modified by CityBus
+            // I need to renew them
+            if(IAlreadyHadA404ErrorAndImInMyRecursiveLoopToTryToFixIt) {
+                //I don't want to go in infinite recursive loops, something is not right, I will raise an error
+                this.clearPreviousBusTimesForBusNumber(chosenBusStop.busNumber)
+                this.addSeveral(mutableListOf(BusStopTime(chosenBusStop.busNumber,"Couldn't set BusStop RCRSV","${responseMap["statusCode"]}")))
+                logger.error("Error setting BusStopDetails in my recursive loop for bus ${chosenBusStop.busNumber}")
+                IAlreadyHadA404ErrorAndImInMyRecursiveLoopToTryToFixIt = false
+            }
+            else {
+                this.reinitialiseCookiesAndSetGetURLsForAliveSessions()
+                IAlreadyHadA404ErrorAndImInMyRecursiveLoopToTryToFixIt = true
+                this.refreshDataFor(chosenBusStop)
             }
         }
         else {
             this.clearPreviousBusTimesForBusNumber(chosenBusStop.busNumber)
-            this.addSeveral(mutableListOf(BusStopTime(0,"Couldn't set BusStop","${responseCode["statusCode"]}")))
-            println("Error setting BusStopDetails : code $responseCode")
+            this.addSeveral(mutableListOf(BusStopTime(0,"Couldn't set BusStop","${responseMap["statusCode"]}")))
+            logger.error("Unknown error setting BusStopDetails : code ${responseMap["statusCode"]} for ${chosenBusStop.busNumber}")
          }
     }
 

@@ -2,6 +2,7 @@ package HongKongBusBackEnd.domain.userSessions
 
 import HongKongBusBackEnd.domain.userProfilePersistence.User
 import HongKongBusBackEnd.infra.userProfilePersistence.UserRepository
+import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
@@ -9,6 +10,7 @@ import java.time.ZoneId
 
 @Component
 class UserSessionManager(val userRepository: UserRepository) {
+    private val logger = LoggerFactory.getLogger(this.javaClass)
     private val userSessions = mutableListOf<UserSession>()
 
     init{
@@ -35,7 +37,11 @@ class UserSessionManager(val userRepository: UserRepository) {
     fun RefreshArrivalTimesForAllSessions(){
         for(userSession in userSessions) {
             userSession.arrivalTimes.refreshDataLoop()
-            println("${LocalDateTime.now()} - Refreshed ArrivalTimes for ${userSession.user.name} - ${userSession.busStopGroupName}")
+            userSession.setLastQueryTimeToNow()
+            logger.info("Refreshed ArrivalTimes for ${userSession.user.name} - ${userSession.busStopGroupName}")
+            for(arrivalTime in userSession.arrivalTimes.getSortedArrivalTimes()) {
+                logger.info(arrivalTime.toString())
+            }
         }
     }
 
@@ -43,17 +49,17 @@ class UserSessionManager(val userRepository: UserRepository) {
     fun PruneSessionInactiveForMoreThan30Minutes(){
         val userSessionsToDelete = mutableListOf<UserSession>()
         for(userSession in userSessions) {
-            if(userSession.lastQueryTime.plusMinutes(30).isBefore(LocalDateTime.now()) && ! userSession.user.name.equals("pi")) {
+            if(userSession.lastQueryTime.plusMinutes(30).isBefore(LocalDateTime.now(ZoneId.of("Asia/Hong_Kong"))) && ! userSession.user.name.equals("pi")) {
                 userSessionsToDelete.add(userSession)
             }
         }
 
         for(userSessionToDelete in userSessionsToDelete) {
             this.removeUserSession(userSessionToDelete)
-            println("${LocalDateTime.now()} - Pruned userSession ${userSessionToDelete.user.name} - ${userSessionToDelete.busStopGroupName} - Age : ${userSessionToDelete.lastQueryTime}")
-            println("${this.userSessions.size} sessions remaining :")
+            logger.info("Pruned userSession ${userSessionToDelete.user.name} - ${userSessionToDelete.busStopGroupName} - Age : ${userSessionToDelete.lastQueryTime}")
+            logger.debug("${this.userSessions.size} sessions remaining :")
             for(mySession in this.userSessions) {
-                println("${mySession.user} - ${mySession.busStopGroupName} last activity at ${mySession.lastQueryTime}")
+                logger.debug("${mySession.user} - ${mySession.busStopGroupName} last activity at ${mySession.lastQueryTime}")
             }
         }
     }
@@ -76,15 +82,6 @@ class UserSessionManager(val userRepository: UserRepository) {
 
     fun sessionIdExists(sessionId: String): Boolean {
         return( this.userSessions.find { it.uniqueSessionId == sessionId } != null)
-    }
-
-//    @Scheduled(cron="0 0 5 * * *", zone="Asia/Hong_Kong")
-    @Scheduled(fixedDelay = 120_000)
-    fun InitialiseCookiesAndSetGetURLsForAliveSessions() {
-        for(userSession in userSessions) {
-            userSession.arrivalTimes.reinitialiseCookiesAndSetGetURLsForAliveSessions()
-            println("${LocalDateTime.now(ZoneId.of("Asia/Hong_Kong"))} Refreshed Cookies and SetGetURLs for ${userSession.user.name}")
-        }
     }
 }
 

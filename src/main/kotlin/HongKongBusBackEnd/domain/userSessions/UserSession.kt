@@ -4,13 +4,14 @@ import HongKongBusBackEnd.domain.bus.ArrivalTimes
 import HongKongBusBackEnd.domain.userProfilePersistence.User
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
+import java.time.ZoneId
 import java.util.*
 
 class UserSession(val user : User, var busStopGroupName : String) {
 
     val arrivalTimes = ArrivalTimes(user.getAllChosenBusStopsForGroup(busStopGroupName))
     val uniqueSessionId = if(this.user.name == "pi") "1" else UUID.randomUUID().toString()
-    var lastQueryTime : LocalDateTime = now()
+    var lastQueryTime : LocalDateTime = now(ZoneId.of("Asia/Hong_Kong"))
 
     init{
         this.arrivalTimes.refreshDataLoop()
@@ -25,6 +26,6 @@ class UserSession(val user : User, var busStopGroupName : String) {
     }
 
     fun setLastQueryTimeToNow() {
-        this.lastQueryTime = now()
+        this.lastQueryTime = now(ZoneId.of("Asia/Hong_Kong"))
     }
 }
