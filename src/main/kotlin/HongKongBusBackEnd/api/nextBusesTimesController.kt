@@ -34,7 +34,7 @@ class nextBusesTimesController(
             return ResponseEntity(mySession.arrivalTimes.getResult(),HttpStatus.OK)
         }
         else {
-            return ResponseEntity(HashMap(), HttpStatus.NOT_FOUND)
+            return ResponseEntity(HashMap(), HttpStatus.UNAUTHORIZED)
         }
     }
  }

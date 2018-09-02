@@ -46,6 +46,7 @@ def GetDisplayColor(busNumber):
 
 
 def GetCityBusProcess():
+    global myLogger
     for myProcess in psutil.process_iter():
         if 'sudo' in myProcess.cmdline():
             if 'python' in myProcess.cmdline():
@@ -66,37 +67,39 @@ def GetCityBusProcess():
 
 def RefreshBusTimeData():
     global NextArrivalTimes
+    global myLogger
 
     FoundArrivalTimes = []
     while True:
         try:
+            myLogger.info("Beginning of While True Loop")
             FoundArrivalTimes = []
-            # response = requests.get('http://localhost:8080/nextBusesTimesFor?sessionId=1')
             response = requests.get('https://hong-kong-bus.herokuapp.com/nextBusesTimesFor?sessionId=1')
             data = response.json()
             for obj in data.get('arrivalTimes'):
                 FoundArrivalTimes.append(
                     BusTimeToDisplay.BusTimeToDisplay(obj.get('busNumber'), obj.get('arrivalTime'), obj.get('distance'),
                                                       GetDisplayColor(obj.get('busNumber'))))
-            myLogger.info("RefreshBusTimeData while True Loop started")
-
+            myLogger.info("RefreshBusTimeData successfully retrieved %s elements", len(FoundArrivalTimes))
         except requests.ConnectionError as err:
             FoundArrivalTimes.append(
                 BusTimeToDisplay.BusTimeToDisplay(0,'OFFLN','OFFLN',DarkRed)
             )
-            myLogger.info('Connection error while refreshing BusTimeData')
+            myLogger.error('Connection error while refreshing BusTimeData')
             myLogger.exception(err)
             time.sleep(30)
         except requests.exceptions.Timeout as err:
             FoundArrivalTimes.append(
                 BusTimeToDisplay.BusTimeToDisplay(0,'TMOUT','TMOUT',DarkRed)
             )
-            myLogger.info('Time out while refreshing BusTimeData')
+            myLogger.error('Time out while refreshing BusTimeData')
             myLogger.exception(err)
             time.sleep(30)
         except requests.exceptions.RequestException as err:
-            myLogger.exception("Couldn't GET the BusTimeData")
+            myLogger.error("Couldn't GET the BusTimeData")
             myLogger.exception(err)
+        except err:
+            myLogger.error("Unmanaged exception caught during GET nextBusTimesFor - response code %s", response.status_code)
         finally:
             NextArrivalTimes = sorted(FoundArrivalTimes,
                                       key=lambda myBusTime: myBusTime.arrivalTime.replace("00:", "24:"))
@@ -105,6 +108,8 @@ def RefreshBusTimeData():
 
 def KeepDisplayUpdated():
     global NextArrivalTimes
+    global myLogger
+
     # Rows and chain length are both required parameters:
     matrix = Adafruit_RGBmatrix(32, 2)
 
@@ -124,7 +129,7 @@ def KeepDisplayUpdated():
         myDraw.text((19, 0), time.strftime('%H:%M', time.localtime()), DarkWhite, font=font)
 
         localNextArrivalTimesToAvoidConcurrencyIssues = NextArrivalTimes
-        for nextArrivalTime in NextArrivalTimes :
+        for nextArrivalTime in NextArrivalTimes:
             myLogger.debug(nextArrivalTime)
 
         if len(localNextArrivalTimesToAvoidConcurrencyIssues) == 0:
@@ -182,10 +187,10 @@ def KeepDisplayUpdated():
                 myDraw.text((35, fontSize * 2), localNextArrivalTimesToAvoidConcurrencyIssues[3].distance,
                             localNextArrivalTimesToAvoidConcurrencyIssues[3].color, font=font)
 
-        myLogger.info("DisplayUpdated : Before RGBMatrix.Clear")
+        myLogger.debug("DisplayUpdated : Before RGBMatrix.Clear")
         matrix.Clear()
 
-        myLogger.info("DisplayUpdated : Before RGBMatrix.SetImage")
+        myLogger.debug("DisplayUpdated : Before RGBMatrix.SetImage")
         matrix.SetImage(myImage.im.id, 0, 0)
 
         if displaying == 'arrivalTime':
@@ -201,6 +206,8 @@ def KeepDisplayUpdated():
 
 
 def ThreadManager():
+    global myLogger
+
     # wakes up every 5 minutes to check if the 2 threads are running
     # restarts missing ones if needed
 

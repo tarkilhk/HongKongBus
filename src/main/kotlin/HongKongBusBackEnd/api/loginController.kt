@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class login(val sessionManager: UserSessionManager){
+class loginController(val sessionManager: UserSessionManager){
 
     @RequestMapping("/login")
-    fun login(@RequestParam(value="userName") name: String) : ResponseEntity<String>
+    fun loginController(@RequestParam(value="userName") name: String) : ResponseEntity<String>
     {
         if(sessionManager.sessionExistsFor(name)) {
             val mySession = this.sessionManager.getUserSessionForUserName(name)!!
