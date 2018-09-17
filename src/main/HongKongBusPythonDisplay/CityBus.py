@@ -74,8 +74,8 @@ def RefreshBusTimeData():
         try:
             myLogger.info("Beginning of While True Loop")
             FoundArrivalTimes = []
-            # response = requests.get('https://hong-kong-bus.herokuapp.com/nextBusesTimesFor?sessionId=1')
-            response = requests.get('http://localhost:8080/nextBusesTimesFor?sessionId=1')
+            response = requests.get('https://hong-kong-bus.herokuapp.com/nextBusesTimesFor?sessionId=1')
+            # response = requests.get('http://localhost:8080/nextBusesTimesFor?sessionId=1')
             data = response.json()
             for obj in data.get('arrivalTimes'):
                 FoundArrivalTimes.append(
