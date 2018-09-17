@@ -120,10 +120,11 @@ class CityBusHelper {
             val message: String = response.text
 
             val resultingDocument: Document = Jsoup.parse(message)
-            val tableRows: Elements = resultingDocument.select("div#nextbus_listitem > table")
+            val tableRowsNextbus_listitem: Elements = resultingDocument.select("div#nextbus_listitem > table")
+            val tableRowsNextbus_list: Elements = resultingDocument.select("div#nextbus_list > table")
 
-            if (tableRows.isNotEmpty()) {
-                for (myRow in tableRows) {
+            if (tableRowsNextbus_listitem.isNotEmpty()) {
+                for (myRow in tableRowsNextbus_listitem) {
                     val myCells = myRow.select("td").filter { it.childNodeSize() == 1 }
                     if (myCells.size == 3) {
                         arrivalTimes.add(BusStopTime(busStopNumber, myCells.elementAt(0).text(), myCells.elementAt(2).text()))
@@ -135,6 +136,14 @@ class CityBusHelper {
             } else {
                 //No bus found
                 logger.warn("GetBusStopETA is successful, but no Table Rows for bus $busStopNumber")
+                if (tableRowsNextbus_list.isNotEmpty()) {
+                    val errorMessage = tableRowsNextbus_list[0].select("td")[0].text()
+                    logger.warn(errorMessage)
+                    arrivalTimes.add(BusStopTime(-1, errorMessage,"-1"))
+                }
+                else {
+                    logger.warn("No reason found on CityBus website")
+                }
             }
         }
         else {

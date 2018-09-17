@@ -74,12 +74,13 @@ def RefreshBusTimeData():
         try:
             myLogger.info("Beginning of While True Loop")
             FoundArrivalTimes = []
-            response = requests.get('https://hong-kong-bus.herokuapp.com/nextBusesTimesFor?sessionId=1')
+            # response = requests.get('https://hong-kong-bus.herokuapp.com/nextBusesTimesFor?sessionId=1')
+            response = requests.get('http://localhost:8080/nextBusesTimesFor?sessionId=1')
             data = response.json()
             for obj in data.get('arrivalTimes'):
                 FoundArrivalTimes.append(
                     BusTimeToDisplay.BusTimeToDisplay(obj.get('busNumber'), obj.get('arrivalTime'), obj.get('distance'),
-                                                      GetDisplayColor(obj.get('busNumber'))))
+                                                      obj.get('isErrorMessage'), GetDisplayColor(obj.get('busNumber'))))
             myLogger.info("RefreshBusTimeData successfully retrieved %s elements", len(FoundArrivalTimes))
         except requests.ConnectionError as err:
             FoundArrivalTimes.append(
@@ -135,12 +136,15 @@ def KeepDisplayUpdated():
         if len(localNextArrivalTimesToAvoidConcurrencyIssues) == 0:
             myDraw.text((3, fontSize), "No bus", DarkRed, font=font)
         elif len(localNextArrivalTimesToAvoidConcurrencyIssues) == 1:
-            if displaying == 'arrivalTime':
-                myDraw.text((3, fontSize), localNextArrivalTimesToAvoidConcurrencyIssues[0].arrivalTime,
-                            localNextArrivalTimesToAvoidConcurrencyIssues[0].color, font=font)
+            if localNextArrivalTimesToAvoidConcurrencyIssues[0].isErrorMessage:
+                myDraw.text(localNextArrivalTimesToAvoidConcurrencyIssues[0].arrivalTime)
             else:
-                myDraw.text((3, fontSize), localNextArrivalTimesToAvoidConcurrencyIssues[0].distance,
-                            localNextArrivalTimesToAvoidConcurrencyIssues[0].color, font=font)
+                if displaying == 'arrivalTime':
+                    myDraw.text((3, fontSize), localNextArrivalTimesToAvoidConcurrencyIssues[0].arrivalTime,
+                                localNextArrivalTimesToAvoidConcurrencyIssues[0].color, font=font)
+                else:
+                    myDraw.text((3, fontSize), localNextArrivalTimesToAvoidConcurrencyIssues[0].distance,
+                                localNextArrivalTimesToAvoidConcurrencyIssues[0].color, font=font)
         elif len(localNextArrivalTimesToAvoidConcurrencyIssues) == 2:
             if displaying == 'arrivalTime':
                 myDraw.text((3, fontSize), localNextArrivalTimesToAvoidConcurrencyIssues[0].arrivalTime,
