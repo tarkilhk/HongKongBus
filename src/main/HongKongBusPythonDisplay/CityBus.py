@@ -80,7 +80,7 @@ def RefreshBusTimeData():
             for obj in data.get('arrivalTimes'):
                 FoundArrivalTimes.append(
                     BusTimeToDisplay.BusTimeToDisplay(obj.get('busNumber'), obj.get('arrivalTime'), obj.get('distance'),
-                                                      obj.get('isErrorMessage'), GetDisplayColor(obj.get('busNumber'))))
+                                                      obj.get('isAnError'), GetDisplayColor(obj.get('busNumber'))))
             myLogger.info("RefreshBusTimeData successfully retrieved %s elements", len(FoundArrivalTimes))
         except requests.ConnectionError as err:
             FoundArrivalTimes.append(
@@ -136,7 +136,7 @@ def KeepDisplayUpdated():
         if len(localNextArrivalTimesToAvoidConcurrencyIssues) == 0:
             myDraw.text((3, fontSize), "No bus", DarkRed, font=font)
         elif len(localNextArrivalTimesToAvoidConcurrencyIssues) == 1:
-            if localNextArrivalTimesToAvoidConcurrencyIssues[0].isErrorMessage:
+            if localNextArrivalTimesToAvoidConcurrencyIssues[0].isAnError:
                 myDraw.text(localNextArrivalTimesToAvoidConcurrencyIssues[0].arrivalTime)
             else:
                 if displaying == 'arrivalTime':

@@ -1,0 +1,2 @@
+"C:\Program Files\MPManager\pscp" -pw raspberry C:\Users\rober\ideaProjects\HongKongBus\src\main\HongKongBusPythonDisplay\CityBus.py pi@192.168.1.106:/home/pi/Downloads/rpi-rgb-led-matrix-master
+"C:\Program Files\MPManager\pscp" -pw raspberry C:\Users\rober\ideaProjects\HongKongBus\src\main\HongKongBusPythonDisplay\BusTimeToDisplay.py pi@192.168.1.106:/home/pi/Downloads/rpi-rgb-led-matrix-master
