@@ -38,7 +38,7 @@ NextArrivalTimes = []
 
 def GetDisplayColor(busNumber):
     displayColor = (0, 0, 0)
-    if busNumber == 11:
+    if busNumber == 11 or busNumber == -1:
         displayColor = DarkRed
     if busNumber == 511:
         displayColor = LightRed
@@ -137,7 +137,9 @@ def KeepDisplayUpdated():
             myDraw.text((3, fontSize), "No bus", DarkRed, font=font)
         elif len(localNextArrivalTimesToAvoidConcurrencyIssues) == 1:
             if localNextArrivalTimesToAvoidConcurrencyIssues[0].isAnError:
-                myDraw.text(localNextArrivalTimesToAvoidConcurrencyIssues[0].arrivalTime)
+                # myDraw.text((1, fontSize), localNextArrivalTimesToAvoidConcurrencyIssues[0].arrivalTime,
+                myDraw.text((3, fontSize), "Issue CB",
+                            localNextArrivalTimesToAvoidConcurrencyIssues[0].color, font=font)
             else:
                 if displaying == 'arrivalTime':
                     myDraw.text((3, fontSize), localNextArrivalTimesToAvoidConcurrencyIssues[0].arrivalTime,
