@@ -40,6 +40,7 @@ class ArrivalTimes(var chosenBusStops : MutableList<BusStopConfig>) {
     }
 
     fun clearPreviousBusTimesForBusNumber(busNumber: Int){
+        arrivalTimes.removeAll { it.isErrorMessage }
         arrivalTimes.removeAll {it.busNumber == busNumber}
     }
 
