@@ -3,5 +3,6 @@ applications:
 - name: hong-kong-bus
   memory: 512M
   instances: 1
+  path: target/hong-kong-bus-0.0.1-SNAPSHOT.jar
 buildpacks:
 - java_buildpack
