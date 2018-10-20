@@ -4,11 +4,11 @@ import HongKongBusBackEnd.domain.userProfilePersistence.User
 import HongKongBusBackEnd.infra.userProfilePersistence.UserRepository
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.time.ZoneId
 
-@Component
+@Service
 class UserSessionManager(val userRepository: UserRepository) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val userSessions = mutableListOf<UserSession>()
