@@ -13,10 +13,16 @@ class UserSessionManager(val userRepository: UserRepository) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val userSessions = mutableListOf<UserSession>()
 
+    //TODO : remove this init part : maybe this is what causes BOOT TIMEOUT ???
     init{
+        logger.info("Going to INIT my UserSessionManager")
+        logger.info("Before userRepo.findByName(pi)")
         val pi = this.userRepository.findByName("pi").firstOrNull()
+        logger.info("Before addNewUserSession")
         val piUserSession = this.addNewUserSession(pi!!)
+        logger.info("Before changeConfig")
         piUserSession.changeConfig("CastleDown")
+        logger.info("Done with INIT of UserSessionManager")
     }
 
     fun addNewUserSession(existingUser : User) : UserSession {
