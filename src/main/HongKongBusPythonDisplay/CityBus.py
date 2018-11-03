@@ -10,7 +10,6 @@ import logging
 from logging.handlers import RotatingFileHandler
 import BusTimeToDisplay
 
-
 # Define running folder
 if os.name == 'nt':
     ProgramFolder = 'C:\\Users\\rober\\ideaProjects\\HongKongBus\\src\\main\\HongKongBusPythonDisplay\\'
@@ -69,6 +68,9 @@ def RefreshBusTimeData():
     global NextArrivalTimes
     global myLogger
 
+    IKnowSessionIdEqualsOne = requests.get('https://hong-kong-bus.herokuapp.com/login?userName=pi')
+    setBusConfigName = requests.get('https://hong-kong-bus.herokuapp.com/nextBusesTimesFor?sessionId=1&configName=CastleDown')
+
     FoundArrivalTimes = []
     while True:
         try:
@@ -84,14 +86,14 @@ def RefreshBusTimeData():
             myLogger.info("RefreshBusTimeData successfully retrieved %s elements", len(FoundArrivalTimes))
         except requests.ConnectionError as err:
             FoundArrivalTimes.append(
-                BusTimeToDisplay.BusTimeToDisplay(0,'OFFLN','OFFLN',DarkRed)
+                BusTimeToDisplay.BusTimeToDisplay(0, 'OFFLN', 'OFFLN', DarkRed)
             )
             myLogger.error('Connection error while refreshing BusTimeData')
             myLogger.exception(err)
             time.sleep(30)
         except requests.exceptions.Timeout as err:
             FoundArrivalTimes.append(
-                BusTimeToDisplay.BusTimeToDisplay(0,'TMOUT','TMOUT',DarkRed)
+                BusTimeToDisplay.BusTimeToDisplay(0, 'TMOUT', 'TMOUT', DarkRed)
             )
             myLogger.error('Time out while refreshing BusTimeData')
             myLogger.exception(err)
@@ -100,7 +102,8 @@ def RefreshBusTimeData():
             myLogger.error("Couldn't GET the BusTimeData")
             myLogger.exception(err)
         except err:
-            myLogger.error("Unmanaged exception caught during GET nextBusTimesFor - response code %s", response.status_code)
+            myLogger.error("Unmanaged exception caught during GET nextBusTimesFor - response code %s",
+                           response.status_code)
         finally:
             NextArrivalTimes = sorted(FoundArrivalTimes,
                                       key=lambda myBusTime: myBusTime.arrivalTime.replace("00:", "24:"))
@@ -217,16 +220,20 @@ def ThreadManager():
     # wakes up every 5 minutes to check if the 2 threads are running
     # restarts missing ones if needed
 
+    print("Arrived in ThreadManager")
+    myLogger.warning("Arrived in ThreadManager")
+
     myRefreshBusTimeDataThread = threading.Thread(name='RefreshBusTimeData', target=RefreshBusTimeData)
     myKeepDisplayUpdatedThread = threading.Thread(name='KeepDisplayUpdated', target=KeepDisplayUpdated)
 
     while True:
+        print("ThreadManager While True Loop started")
         if not myRefreshBusTimeDataThread.isAlive():
             myRefreshBusTimeDataThread.start()
-            myLogger.info('RefreshBusTimeData started')
-        if not myKeepDisplayUpdatedThread.isAlive():
+            myLogger.info('ThreadManager : RefreshBusTimeData started')
+        if not myKeepDisplayUpdatedThread.isAlive() and os.name != 'nt':
             myKeepDisplayUpdatedThread.start()
-            myLogger.info('KeepDisplayUpdated started')
+            myLogger.info('ThreadManager : KeepDisplayUpdated started')
         time.sleep(300)
 
 
@@ -234,9 +241,9 @@ try:
     # Create 1 thread as follows    
     myThreadManagerThread = threading.Thread(name='ThreadManager', target=ThreadManager)
 
-    if os.name=='nt':
+    if os.name == 'nt':
         myThreadManagerThread.start()
-        print("CityBus NT started")
+        print("Main : CityBus NT started")
         myLogger.warning("CityBus NT ThreadManager Started")
     else:
         myProcess = GetCityBusProcess()
@@ -249,25 +256,25 @@ try:
         if myProcess is not None:
             if sys.argv[1] == "start":
                 print("CityBus is already running, cannot start a second time")
-                myLogger.error("CityBus is already running, cannot start a second time")
+                myLogger.error("Main : CityBus is already running, cannot start a second time")
             elif sys.argv[1] == "stop":
-                myLogger.warning("CityBus stopping")
+                myLogger.warning("Main : CityBus stopping")
                 myProcess.terminate()
                 print("CityBus stopped")
             else:
                 print("Wrong argument, only start and stop are supported")
-                myLogger.error("Wrong argument, only start and stop are supported")
+                myLogger.error("Main : Wrong argument, only start and stop are supported")
         else:
             if sys.argv[1] == "start":
                 myLogger.warning('Starting')
                 myThreadManagerThread.start()
                 print("CityBus started")
-                myLogger.warning("CityBus ThreadManager Started")
+                myLogger.warning("Main : CityBus ThreadManager Started")
             elif sys.argv[1] == "stop":
                 print("CityBus is not running, cannot stop it")
-                myLogger.error("CityBus is not running, cannot stop it")
+                myLogger.error("Main : CityBus is not running, cannot stop it")
             else:
                 print("Wrong argument, only start and stop are supported")
-                myLogger.error("Wrong argument, only start and stop are supported")
+                myLogger.error("Main : Wrong argument, only start and stop are supported")
 except:
     myLogger.exception("Unable to run the program")
