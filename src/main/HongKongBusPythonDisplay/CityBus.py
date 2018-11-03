@@ -31,6 +31,10 @@ LightRed = (100, 0, 0)
 DarkWhite = (100, 100, 100)
 PreciousCyan = (102, 245, 173)
 
+# Root URL
+# rootUrl = "https://hong-kong-bus.herokuapp.com"
+rootUrl = "http://127.0.0.1:5000"
+
 # Global variable to be used between the 2 threads
 NextArrivalTimes = []
 
@@ -68,16 +72,15 @@ def RefreshBusTimeData():
     global NextArrivalTimes
     global myLogger
 
-    IKnowSessionIdEqualsOne = requests.get('https://hong-kong-bus.herokuapp.com/login?userName=pi')
-    setBusConfigName = requests.get('https://hong-kong-bus.herokuapp.com/nextBusesTimesFor?sessionId=1&configName=CastleDown')
+    sessionIdWhichIKnowEqualsOne = requests.post(rootUrl + '/users/login', data={"userName": "pi"}).json()
+    # setBusConfigName = requests.get('https://hong-kong-bus.herokuapp.com/nextBusesTimesFor?sessionId=1&configName=CastleDown')
 
     FoundArrivalTimes = []
     while True:
         try:
             myLogger.info("Beginning of While True Loop")
             FoundArrivalTimes = []
-            response = requests.get('https://hong-kong-bus.herokuapp.com/nextBusesTimesFor?sessionId=1')
-            # response = requests.get('http://localhost:8080/nextBusesTimesFor?sessionId=1')
+            response = requests.get(rootUrl + '/busTimes/nextFor?sessionId='+str(sessionIdWhichIKnowEqualsOne))
             data = response.json()
             for obj in data.get('arrivalTimes'):
                 FoundArrivalTimes.append(
