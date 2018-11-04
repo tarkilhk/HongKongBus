@@ -21,7 +21,7 @@ class CityBusHelper {
     }
 
     fun loadFirstWebPageAndSaveCookies() {
-        val response: Response = khttp.get("https://mobile.nwstbus.com.hk/nwp3/?f=1&ds=ETA&l=1")
+        val response: Response = khttp.get("https://mobile.nwstbus.com.hk/nwp3/?f=1&ds=ETA&l=1",timeout=60.0)
         if(response.statusCode == 200) {
             logger.info("Retrieved cookies succesfully from landing page")
             val myOwnCookies = mutableMapOf("PPFARE" to "1")
