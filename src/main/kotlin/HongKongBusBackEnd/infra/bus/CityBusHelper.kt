@@ -2,7 +2,6 @@ package HongKongBusBackEnd.infra.bus
 
 import HongKongBusBackEnd.domain.bus.BusStopConfig
 import HongKongBusBackEnd.domain.bus.BusStopTime
-import jdk.nashorn.internal.runtime.regexp.joni.Config.log
 import khttp.responses.Response
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -101,7 +100,7 @@ class CityBusHelper {
         val answer : MutableMap<String, String> = mutableMapOf()
 
         val payload = mapOf("ssid" to this.sessionId, "info" to "${chosenBusStop.busStopUniqueId}||${chosenBusStop.busNumber}-CEF-1||${chosenBusStop.stopNumberOnBusLine}||O")
-        log.info("Before I try to set bus time for ${chosenBusStop.busNumber}")
+        logger.info("Before I try to set bus time for ${chosenBusStop.busNumber}")
         val response: Response = khttp.get("https://mobile.nwstbus.com.hk/nwp3/$urlOfSetBusStop", params = payload, cookies = this.cookies)
 
         answer["statusCode"] = response.statusCode.toString()
