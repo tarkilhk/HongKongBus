@@ -13,9 +13,9 @@ class UserSession(val user : User, var busStopGroupName : String) {
     val uniqueSessionId = if(this.user.name == "pi") "1" else UUID.randomUUID().toString()
     var lastQueryTime : LocalDateTime = now(ZoneId.of("Asia/Hong_Kong"))
 
-    init{
-        this.arrivalTimes.refreshDataLoop()
-    }
+//    init{
+//        this.arrivalTimes.refreshDataLoop()
+//    }
 
     fun changeConfig(newDesiredBusStopGroupName: String) {
         this.busStopGroupName = newDesiredBusStopGroupName
