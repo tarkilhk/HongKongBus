@@ -80,7 +80,7 @@ def RefreshBusTimeData():
         try:
             myLogger.info("Beginning of While True Loop")
             FoundArrivalTimes = []
-            response = requests.get(rootUrl + '/busTimes/nextFor?sessionId='+str(sessionIdWhichIKnowEqualsOne), timeout=30)
+            response = requests.get(rootUrl + '/busTimes/nextFor?sessionId='+str(sessionIdWhichIKnowEqualsOne), timeout=60)
             data = response.json()
             for obj in data.get('arrivalTimes'):
                 FoundArrivalTimes.append(
