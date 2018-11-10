@@ -72,8 +72,8 @@ def RefreshBusTimeData():
     global NextArrivalTimes
     global myLogger
 
+    # sessionIdWhichIKnowEqualsOne = "222"
     sessionIdWhichIKnowEqualsOne = requests.post(rootUrl + '/users/login', data={"userName": "pi"}).json()
-    # setBusConfigName = requests.get('https://hong-kong-bus.herokuapp.com/nextBusesTimesFor?sessionId=1&configName=CastleDown')
 
     FoundArrivalTimes = []
     while True:
@@ -81,12 +81,26 @@ def RefreshBusTimeData():
             myLogger.info("Beginning of While True Loop")
             FoundArrivalTimes = []
             response = requests.get(rootUrl + '/busTimes/nextFor?sessionId='+str(sessionIdWhichIKnowEqualsOne), timeout=60)
-            data = response.json()
-            for obj in data.get('arrivalTimes'):
-                FoundArrivalTimes.append(
-                    BusTimeToDisplay.BusTimeToDisplay(obj.get('busNumber'), obj.get('arrivalTime'), obj.get('distance'),
-                                                      obj.get('isAnError'), GetDisplayColor(obj.get('busNumber'))))
-            myLogger.info("RefreshBusTimeData successfully retrieved %s elements", len(FoundArrivalTimes))
+            if response.status_code == 200:
+                data = response.json()
+                for obj in data.get('arrivalTimes'):
+                    FoundArrivalTimes.append(
+                        BusTimeToDisplay.BusTimeToDisplay(obj.get('busNumber'), obj.get('arrivalTime'), obj.get('distance'),
+                                                          obj.get('isAnError'), GetDisplayColor(obj.get('busNumber'))))
+                myLogger.info("RefreshBusTimeData successfully retrieved %s elements", len(FoundArrivalTimes))
+            else:
+                myLogger.error("Received Status Code = %s when trying to refresh NextBusTimes", response.status_code)
+                if response.status_code == 401:
+                    # I need to login again
+                    myLogger.info("I will try to login as pi user again")
+                    responseBis = requests.post(rootUrl + '/users/login', data={"userName": "pi"})
+                    if responseBis.status_code != 200 :
+                        myLogger.error("Couldn't relogin for pi : status = %s, message = ", responseBis.status_code, responseBis.text)
+                    else:
+                        myLogger.info("Successfully re logged in as pi")
+                        sessionIdWhichIKnowEqualsOne = responseBis.json()
+                else:
+                    myLogger.error("I don't know how to handle this exception : code %s, message %s", response.status_code, response.text)
         except requests.ConnectionError as err:
             FoundArrivalTimes.append(
                 BusTimeToDisplay.BusTimeToDisplay(0, 'OFFLN', 'OFFLN', DarkRed)
@@ -104,9 +118,9 @@ def RefreshBusTimeData():
         except requests.exceptions.RequestException as err:
             myLogger.error("Couldn't GET the BusTimeData")
             myLogger.exception(err)
-        except err:
+        except Exception as err:
             myLogger.error("Unmanaged exception caught during GET nextBusTimesFor - response code %s",
-                           response.status_code)
+                           str(err))
         finally:
             NextArrivalTimes = sorted(FoundArrivalTimes,
                                       key=lambda myBusTime: myBusTime.arrivalTime.replace("00:", "24:"))
