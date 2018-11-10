@@ -39,8 +39,9 @@ class UserSessionManager(val userRepository: UserRepository) {
         }
     }
 
-    @Scheduled(fixedDelay = 20_000)
+    @Scheduled(fixedDelay = 10_000)
     fun RefreshArrivalTimesForAllSessions(){
+        Thread.sleep((5..20).shuffled().last().toLong())
         for(userSession in userSessions) {
             userSession.arrivalTimes.refreshDataLoop()
             userSession.setLastQueryTimeToNow()
