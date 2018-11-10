@@ -7,7 +7,9 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
 import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
 
+@Service
 class CityBusHelper {
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private var urlOfSetBusStop = ""
@@ -20,7 +22,7 @@ class CityBusHelper {
         loadSetGetURLsFromFB()
     }
 
-    fun loadFirstWebPageAndSaveCookies() {
+    final fun loadFirstWebPageAndSaveCookies() {
         val response: Response = khttp.get("https://mobile.nwstbus.com.hk/nwp3/?f=1&ds=ETA&l=1",timeout=60.0)
         if(response.statusCode == 200) {
             logger.info("Retrieved cookies succesfully from landing page")
@@ -45,7 +47,7 @@ class CityBusHelper {
         }
     }
 
-    fun loadSetGetURLsFromFB() {
+    final fun loadSetGetURLsFromFB() {
         var inMapClickAction = false
         var inShowETA = false
 

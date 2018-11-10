@@ -2,14 +2,15 @@ package HongKongBusBackEnd.domain.userSessions
 
 import HongKongBusBackEnd.domain.bus.ArrivalTimes
 import HongKongBusBackEnd.domain.userProfilePersistence.User
+import HongKongBusBackEnd.infra.bus.CityBusHelper
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
 import java.time.ZoneId
 import java.util.*
 
-class UserSession(val user : User, var busStopGroupName : String) {
+class UserSession(val user : User, var busStopGroupName : String, cityBusHelper: CityBusHelper) {
 
-    val arrivalTimes = ArrivalTimes(user.getAllChosenBusStopsForGroup(busStopGroupName))
+    val arrivalTimes = ArrivalTimes(user.getAllChosenBusStopsForGroup(busStopGroupName), cityBusHelper)
     val uniqueSessionId = if(this.user.name == "pi") "1" else UUID.randomUUID().toString()
     var lastQueryTime : LocalDateTime = now(ZoneId.of("Asia/Hong_Kong"))
 

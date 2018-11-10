@@ -1,6 +1,7 @@
 package HongKongBusBackEnd.domain.userSessions
 
 import HongKongBusBackEnd.domain.userProfilePersistence.User
+import HongKongBusBackEnd.infra.bus.CityBusHelper
 import HongKongBusBackEnd.infra.userProfilePersistence.UserRepository
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
@@ -9,7 +10,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 
 @Service
-class UserSessionManager(val userRepository: UserRepository) {
+class UserSessionManager(val userRepository: UserRepository, val cityBusHelper: CityBusHelper) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val userSessions = mutableListOf<UserSession>()
 
@@ -26,7 +27,7 @@ class UserSessionManager(val userRepository: UserRepository) {
 //    }
 
     fun addNewUserSession(existingUser : User) : UserSession {
-        val newUserSession = UserSession(existingUser, "")
+        val newUserSession = UserSession(existingUser, "", cityBusHelper)
         this.userSessions.add(newUserSession)
         return newUserSession
     }

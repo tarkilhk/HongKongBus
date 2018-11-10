@@ -8,9 +8,8 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 
-class ArrivalTimes(var chosenBusStops : MutableList<BusStopConfig>) {
+class ArrivalTimes(var chosenBusStops : MutableList<BusStopConfig>, val cityBusHelper: CityBusHelper) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
-    private val cityBusHelper = CityBusHelper()
     private val arrivalTimes = mutableListOf<BusStopTime>()
     private var lastRefreshTime = LocalDateTime.now(ZoneId.of("Asia/Hong_Kong")).format(DateTimeFormatter.ofPattern("HH:mm:ss"))
 

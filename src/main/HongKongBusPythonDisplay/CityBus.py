@@ -32,7 +32,7 @@ DarkWhite = (100, 100, 100)
 PreciousCyan = (102, 245, 173)
 
 # Root URL
-rootUrl = "https://hong-kong-bus.herokuapp.com"
+rootUrl = "https://hong-kong-bus-us.herokuapp.com"
 # rootUrl = "http://127.0.0.1:5000"
 
 # Global variable to be used between the 2 threads
