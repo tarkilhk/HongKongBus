@@ -18,6 +18,7 @@ class CityBusHelper {
     private var sessionId : String = ""
 
     init{
+        logger.info("Initialising CityBusHelper Service")
         loadFirstWebPageAndSaveCookies()
         loadSetGetURLsFromFB()
     }
