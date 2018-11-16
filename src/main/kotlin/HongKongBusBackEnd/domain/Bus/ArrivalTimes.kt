@@ -82,8 +82,8 @@ class ArrivalTimes(var chosenBusStops : MutableList<BusStopConfig>, val cityBusH
             }
             else {
                 this.clearPreviousBusTimesForBusNumber(chosenBusStop.busNumber)
-                this.addSeveral(mutableListOf(BusStopTime(0,"Couldn't set BusStop","")))
-                logger.error("Error setting BusStopDetails : 200, but result is not OK : ${responseMap["body"]}")
+                this.addSeveral(mutableListOf(BusStopTime(-1,"Couldn't set BusStop","")))
+                logger.error("Error setting BusStopDetails : 200, but result is not OK : '${responseMap["body"]}'")
             }
         }
         else if (responseMap["statusCode"].equals("404")) {
