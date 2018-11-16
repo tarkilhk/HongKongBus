@@ -80,9 +80,13 @@ class ArrivalTimes(var chosenBusStops : MutableList<BusStopConfig>, val cityBusH
                 this.addSeveral(result)
                 lastRefreshTime = LocalDateTime.now(ZoneId.of("Asia/Hong_Kong")).format(DateTimeFormatter.ofPattern("HH:mm:ss"))
             }
+            else if (responseMap["body"].equals("::")) {
+                cityBusHelper.loadFirstWebPageAndSaveCookies()
+                cityBusHelper.loadSetGetURLsFromFB()
+            }
             else {
                 this.clearPreviousBusTimesForBusNumber(chosenBusStop.busNumber)
-                this.addSeveral(mutableListOf(BusStopTime(-1,"Couldn't set BusStop","")))
+                this.addSeveral(mutableListOf(BusStopTime(-1, "Couldn't set BusStop", "")))
                 logger.error("Error setting BusStopDetails : 200, but result is not OK : '${responseMap["body"]}'")
             }
         }
