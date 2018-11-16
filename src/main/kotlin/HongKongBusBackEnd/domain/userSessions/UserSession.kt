@@ -23,7 +23,7 @@ class UserSession(val user : User, var busStopGroupName : String, cityBusHelper:
         this.arrivalTimes.clearDesiredBusStops()
         this.arrivalTimes.addSeveralDesiredBusStop(user.getAllChosenBusStopsForGroup(newDesiredBusStopGroupName))
 
-        this.arrivalTimes.refreshDataLoop()
+//        this.arrivalTimes.refreshDataLoop()
     }
 
     fun setLastQueryTimeToNow() {
