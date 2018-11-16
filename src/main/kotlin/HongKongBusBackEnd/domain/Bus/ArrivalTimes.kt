@@ -28,7 +28,7 @@ class ArrivalTimes(var chosenBusStops : MutableList<BusStopConfig>, val cityBusH
     }
 
     fun getSortedArrivalTimes(): List<BusStopTime> {
-        return this.arrivalTimes.sortedWith(compareBy(BusStopTime::arrivalTime))
+        return this.arrivalTimes.sortedWith(compareBy(BusStopTime::arrivalTime24H))
     }
     
     fun getResult(): HashMap<String, Any> {
