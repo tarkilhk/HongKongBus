@@ -54,7 +54,7 @@ data class User (
     {
         val chosenBusStops = mutableListOf<BusStopConfig>()
         var nameToQuery: String = name
-        if (nameToQuery == "") {
+        if (nameToQuery == "default") {
             //This happens when user logins, and doesn't specify a default config
             //TODO : load default config from DB instead, after isDefault has been implemented
             nameToQuery = "CastleDown"

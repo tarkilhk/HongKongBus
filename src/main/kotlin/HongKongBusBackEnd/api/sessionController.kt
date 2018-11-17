@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*
 
 
 @RestController
-@RequestMapping("/session")
+@RequestMapping("/sessions")
 class sessionController(val sessionManager: UserSessionManager){
 
     @GetMapping("/configNames")
@@ -30,7 +30,7 @@ class sessionController(val sessionManager: UserSessionManager){
         if(sessionManager.sessionIdExists(sessionId)) {
             //TODO : protect from unknown configName
             sessionManager.getUserSessionById(sessionId)!!.changeConfig(configName)
-            return ResponseEntity("configName change to $configName", HttpStatus.OK)
+            return ResponseEntity("configName changed to $configName", HttpStatus.OK)
         }
         else {
             return ResponseEntity("sessionId $sessionId doesn't exist", HttpStatus.UNAUTHORIZED)

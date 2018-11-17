@@ -40,7 +40,7 @@ class UserSessionManager(val newUserSessionEventBus: NewUserSessionEventBus, val
 //    }
 
     fun addNewUserSession(existingUser : User) : UserSession {
-        val newUserSession = UserSession(existingUser, "", cityBusHelper)
+        val newUserSession = UserSession(existingUser, "default", cityBusHelper)
         this.userSessions.add(newUserSession)
         newUserSessionEventBus.post(newUserSession)
         return newUserSession
@@ -60,7 +60,7 @@ class UserSessionManager(val newUserSessionEventBus: NewUserSessionEventBus, val
         Thread.sleep((5..20).shuffled().last().toLong())
         for(userSession in userSessions) {
             userSession.arrivalTimes.refreshDataLoop()
-            userSession.setLastQueryTimeToNow()
+//            userSession.setLastQueryTimeToNow()
             logger.info("Refreshed ArrivalTimes for ${userSession.user.name} - ${userSession.busStopGroupName}")
             for(arrivalTime in userSession.arrivalTimes.getSortedArrivalTimes()) {
                 logger.info(arrivalTime.toString())
@@ -105,6 +105,10 @@ class UserSessionManager(val newUserSessionEventBus: NewUserSessionEventBus, val
 
     fun sessionIdExists(sessionId: String): Boolean {
         return( this.userSessions.find { it.uniqueSessionId == sessionId } != null)
+    }
+
+    fun getAll(): MutableList<UserSession> {
+        return this.userSessions
     }
 }
 
