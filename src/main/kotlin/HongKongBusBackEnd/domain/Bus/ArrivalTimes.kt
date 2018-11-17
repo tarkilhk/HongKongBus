@@ -32,6 +32,10 @@ class ArrivalTimes(var chosenBusStops : MutableList<BusStopConfig>, val cityBusH
     }
     
     fun getResult(): HashMap<String, Any> {
+        if (this.arrivalTimes.size > 1)
+        {
+            this.arrivalTimes.removeAll{it.isIsAnError}
+        }
         val map = HashMap<String, Any>()
         map["lastRefreshTime"] = this.lastRefreshTime
         map["arrivalTimes"] = this.getSortedArrivalTimes()
