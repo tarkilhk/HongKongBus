@@ -29,7 +29,7 @@ class sessionController(val sessionManager: UserSessionManager){
     fun changeConfigName(@RequestParam(value="sessionId") sessionId: String, @RequestParam(value="configName") configName : String) : ResponseEntity<String> {
         if(sessionManager.sessionIdExists(sessionId)) {
             //TODO : protect from unknown configName
-            sessionManager.getUserSessionById(sessionId)!!.changeConfig(configName)
+            sessionManager.changeConfig(sessionManager.getUserSessionById(sessionId)!!,configName)
             return ResponseEntity("configName changed to $configName", HttpStatus.OK)
         }
         else {

@@ -8,9 +8,11 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 
-class ArrivalTimes(var chosenBusStops : MutableList<BusStopConfig>, val cityBusHelper: CityBusHelper) {
+class ArrivalTimes(val cityBusHelper: CityBusHelper) {
+    private val chosenBusStops = mutableListOf<BusStopConfig>()
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val arrivalTimes = mutableListOf<BusStopTime>()
+    private var isLoaded = false
     private var lastRefreshTime = LocalDateTime.now(ZoneId.of("Asia/Hong_Kong")).format(DateTimeFormatter.ofPattern("HH:mm:ss"))
 
     private var IAlreadyHadA404ErrorAndImInMyRecursiveLoopToTryToFixIt = false
@@ -32,6 +34,7 @@ class ArrivalTimes(var chosenBusStops : MutableList<BusStopConfig>, val cityBusH
     }
     
     fun getResult(): HashMap<String, Any> {
+        //TODO : if several entries are -1, and no successful one, I will not send back the -1 issue; need to pick a first one (highly likely that they would all be the same root cause)
         if (this.arrivalTimes.size > 1)
         {
             this.arrivalTimes.removeAll{it.isIsAnError}
@@ -39,6 +42,7 @@ class ArrivalTimes(var chosenBusStops : MutableList<BusStopConfig>, val cityBusH
         val map = HashMap<String, Any>()
         map["lastRefreshTime"] = this.lastRefreshTime
         map["arrivalTimes"] = this.getSortedArrivalTimes()
+        map["isLoaded"] = this.isLoaded
         return map
     }
 
@@ -62,8 +66,11 @@ class ArrivalTimes(var chosenBusStops : MutableList<BusStopConfig>, val cityBusH
     }
 
     fun refreshDataLoop() {
-        for (chosenBusStop in this.chosenBusStops) {
-            this.refreshDataFor(chosenBusStop)
+        if(chosenBusStops.size!=0) {
+            for (chosenBusStop in this.chosenBusStops) {
+                this.refreshDataFor(chosenBusStop)
+            }
+            this.setToLoaded()
         }
     }
 
@@ -115,6 +122,14 @@ class ArrivalTimes(var chosenBusStops : MutableList<BusStopConfig>, val cityBusH
             this.addSeveral(mutableListOf(BusStopTime(0,"Couldn't set BusStop","${responseMap["statusCode"]}")))
             logger.error("Unknown error setting BusStopDetails : code ${responseMap["statusCode"]} for ${chosenBusStop.busNumber}")
          }
+    }
+
+    fun setToLoaded() {
+        isLoaded = true
+    }
+
+    fun setToNotLoaded() {
+        isLoaded = false
     }
 
 

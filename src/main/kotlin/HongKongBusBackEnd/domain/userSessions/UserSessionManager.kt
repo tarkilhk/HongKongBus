@@ -16,31 +16,8 @@ class UserSessionManager(val newUserSessionEventBus: NewUserSessionEventBus, val
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val userSessions = mutableListOf<UserSession>()
 
-//    This causes BOOT TIMEOUT when website is too slow... Needs to be done AFTER app startup (cf tentative method below)
-//    init{
-//        logger.info("Going to INIT my UserSessionManager")
-//        logger.info("Before userRepo.findByName(pi)")
-//        val pi = this.userRepository.findByName("pi").firstOrNull()
-//        logger.info("Before addNewUserSession")
-//        val piUserSession = this.addNewUserSession(pi!!)
-//        logger.info("Before changeConfig")
-//        piUserSession.changeConfig("CastleDown")
-//        logger.info("Done with INIT of UserSessionManager")
-//    }
-
-//    @EventListener(ApplicationReadyEvent::class)
-//    fun initAfterSpringBootStartup() {
-//        logger.info("Going to INIT my UserSessionManager")
-//        val pi = this.userRepository.findByName("pi").firstOrNull()
-//        logger.info("Before addNewUserSession")
-//        val piUserSession = this.addNewUserSession(pi!!)
-//        logger.info("Before changeConfig")
-//        piUserSession.changeConfig("CastleDown")
-//        logger.info("Done with INIT of UserSessionManager")
-//    }
-
     fun addNewUserSession(existingUser : User) : UserSession {
-        val newUserSession = UserSession(existingUser, "default", cityBusHelper)
+        val newUserSession = UserSession(existingUser, cityBusHelper)
         this.userSessions.add(newUserSession)
         newUserSessionEventBus.post(newUserSession)
         return newUserSession
@@ -57,10 +34,9 @@ class UserSessionManager(val newUserSessionEventBus: NewUserSessionEventBus, val
 
     @Scheduled(fixedDelay = 10_000)
     fun RefreshArrivalTimesForAllSessions(){
-        Thread.sleep((5..20).shuffled().last().toLong())
+        Thread.sleep((5_000..20_000).shuffled().last().toLong())
         for(userSession in userSessions) {
             userSession.arrivalTimes.refreshDataLoop()
-//            userSession.setLastQueryTimeToNow()
             logger.info("Refreshed ArrivalTimes for ${userSession.user.name} - ${userSession.busStopGroupName}")
             for(arrivalTime in userSession.arrivalTimes.getSortedArrivalTimes()) {
                 logger.info(arrivalTime.toString())
@@ -92,11 +68,12 @@ class UserSessionManager(val newUserSessionEventBus: NewUserSessionEventBus, val
     }
 
     fun getUserSessionById(sessionId: String): UserSession? {
-        val returnUserSession = userSessions.find { it.uniqueSessionId == sessionId }
-        if(returnUserSession != null) {
-            returnUserSession.setLastQueryTimeToNow()
+        if(this.userSessions.size == 0) {
+            return null
         }
-        return returnUserSession
+        else {
+            return this.userSessions.find { it.uniqueSessionId == sessionId }
+        }
     }
 
     fun sessionExistsFor(name: String): Boolean {
@@ -109,6 +86,12 @@ class UserSessionManager(val newUserSessionEventBus: NewUserSessionEventBus, val
 
     fun getAll(): MutableList<UserSession> {
         return this.userSessions
+    }
+
+    fun changeConfig(userSession: UserSession, configName: String) {
+        userSession.changeConfig(configName)
+        //TODO : confirm that with line below uncommented, bus times start getting refreshed via EventBus mechanism
+        newUserSessionEventBus.post(userSession)
     }
 }
 

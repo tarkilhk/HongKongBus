@@ -74,6 +74,12 @@ def RefreshBusTimeData():
 
     # sessionIdWhichIKnowEqualsOne = "222"
     sessionIdWhichIKnowEqualsOne = requests.post(rootUrl + '/users/login', data={"userName": "pi"}).json()
+    myLogger.info("Logged in as pi, sessionId = %s",sessionIdWhichIKnowEqualsOne)
+    answerToChangeConfigName = requests.post(rootUrl + '/sessions/changeConfigName', data={"sessionId": sessionIdWhichIKnowEqualsOne, "configName":"CastleDown"})
+    if answerToChangeConfigName.status_code == 200:
+        myLogger.info("%s : SUCCESS",answerToChangeConfigName)
+    else:
+        myLogger.error("Couldn't changeConfigName - error code %s, error message %s", answerToChangeConfigName.status_code, answerToChangeConfigName.text)
 
     FoundArrivalTimes = []
     while True:

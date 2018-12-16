@@ -8,22 +8,18 @@ import java.time.LocalDateTime.now
 import java.time.ZoneId
 import java.util.*
 
-class UserSession(val user : User, var busStopGroupName : String, cityBusHelper: CityBusHelper) {
+class UserSession(val user : User, cityBusHelper: CityBusHelper) {
 
-    val arrivalTimes = ArrivalTimes(user.getAllChosenBusStopsForGroup(busStopGroupName), cityBusHelper)
+    val arrivalTimes = ArrivalTimes(cityBusHelper)
+    var busStopGroupName = ""
     val uniqueSessionId = if(this.user.name == "pi") "1" else UUID.randomUUID().toString()
     var lastQueryTime : LocalDateTime = now(ZoneId.of("Asia/Hong_Kong"))
 
-//    init{
-//        this.arrivalTimes.refreshDataLoop()
-//    }
-
     fun changeConfig(newDesiredBusStopGroupName: String) {
+        this.arrivalTimes.setToNotLoaded()
         this.busStopGroupName = newDesiredBusStopGroupName
         this.arrivalTimes.clearDesiredBusStops()
         this.arrivalTimes.addSeveralDesiredBusStop(user.getAllChosenBusStopsForGroup(newDesiredBusStopGroupName))
-
-//        this.arrivalTimes.refreshDataLoop()
     }
 
     fun setLastQueryTimeToNow() {
