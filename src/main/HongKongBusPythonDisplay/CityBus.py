@@ -104,7 +104,12 @@ def RefreshBusTimeData():
                         myLogger.error("Couldn't relogin for pi : status = %s, message = ", responseBis.status_code, responseBis.text)
                     else:
                         myLogger.info("Successfully re logged in as pi")
-                        sessionIdWhichIKnowEqualsOne = responseBis.json()
+                        myLogger.info("I will try to change my configBusName to CastleDown")
+                        responseBis = requests.post(rootUrl + '/sessions/changeConfigName', data={"sessionId": sessionIdWhichIKnowEqualsOne, "configName":"CastleDown"})
+                        if responseBis.status_code != 200 :
+                            myLogger.error("Couldn't change busConfigName after relogging in : status = %s, message = ", responseBis.status_code, responseBis.text)
+                        else:
+                            myLogger.info("Successfully change busConfigName to CastleDown")
                 else:
                     myLogger.error("I don't know how to handle this exception : code %s, message %s", response.status_code, response.text)
         except requests.ConnectionError as err:

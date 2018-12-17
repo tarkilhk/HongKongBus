@@ -10,6 +10,22 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/sessions")
 class sessionController(val sessionManager: UserSessionManager){
 
+    @GetMapping
+    fun getAllLiveSessions(): MutableList<HashMap<String,String>> {
+        val listOfSessions = mutableListOf<HashMap<String,String>>()
+
+        for(session in sessionManager.getAll()) {
+            var tempMap = hashMapOf<String,String>()
+            tempMap["user"] = session.user.toString()
+            tempMap["sessionId"] = session.uniqueSessionId
+            tempMap["lastQueryTime"] = session.lastQueryTime.toString()
+            tempMap["busStopGroupName"] = session.busStopGroupName
+            tempMap["isLoaded"] = session.arrivalTimes.isLoaded.toString()
+            listOfSessions.add(tempMap)
+        }
+        return listOfSessions
+    }
+
     @GetMapping("/configNames")
     fun getConfigNames(@RequestParam(value="sessionId") sessionId : String): MutableSet<String>
     {
