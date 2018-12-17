@@ -2,6 +2,7 @@ package HongKongBusBackEnd.domain.bus
 
 import HongKongBusBackEnd.infra.bus.CityBusHelper
 import org.slf4j.LoggerFactory
+import java.lang.Thread.sleep
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -12,7 +13,7 @@ class ArrivalTimes(val cityBusHelper: CityBusHelper) {
     private val chosenBusStops = mutableListOf<BusStopConfig>()
     private val logger = LoggerFactory.getLogger(this.javaClass)
     private val arrivalTimes = mutableListOf<BusStopTime>()
-    private var isLoaded = false
+    var isLoaded = false
     private var lastRefreshTime = LocalDateTime.now(ZoneId.of("Asia/Hong_Kong")).format(DateTimeFormatter.ofPattern("HH:mm:ss"))
 
     private var IAlreadyHadA404ErrorAndImInMyRecursiveLoopToTryToFixIt = false
@@ -34,6 +35,9 @@ class ArrivalTimes(val cityBusHelper: CityBusHelper) {
     }
     
     fun getResult(): HashMap<String, Any> {
+        while(!isLoaded) {
+            sleep(3_000)
+        }
         //TODO : if several entries are -1, and no successful one, I will not send back the -1 issue; need to pick a first one (highly likely that they would all be the same root cause)
         if (this.arrivalTimes.size > 1)
         {
