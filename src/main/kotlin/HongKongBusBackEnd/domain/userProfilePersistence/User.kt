@@ -1,6 +1,7 @@
 package HongKongBusBackEnd.domain.userProfilePersistence
 
 import HongKongBusBackEnd.domain.bus.BusStopConfig
+import org.springframework.transaction.annotation.Transactional
 import javax.persistence.*
 
 
@@ -67,6 +68,7 @@ data class User (
         return chosenBusStops
     }
 
+    @Transactional
     fun attachDesiredBusStop(desiredBusStop: DesiredBusStop) {
         this.desiredBusStops.add(desiredBusStop)
     }
