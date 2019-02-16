@@ -3,7 +3,7 @@ package HongKongBusBackEnd.domain.bus
 import java.util.*
 
 data class BusStopConfig(
-        val busNumber: Int,
+        val busNumber: String,
         internal val busStopUniqueId: String,
         val stopNumberOnBusLine: Int)
 {

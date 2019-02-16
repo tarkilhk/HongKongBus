@@ -1,4 +1,4 @@
-package HongKongBusBackEnd.infra.UserLoginEvenHandling
+package HongKongBusBackEnd.infra.UserLoginEventHandling
 
 import HongKongBusBackEnd.domain.userSessions.UserSession
 import com.google.common.eventbus.AllowConcurrentEvents

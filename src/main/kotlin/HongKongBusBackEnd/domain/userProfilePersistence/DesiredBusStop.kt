@@ -7,11 +7,11 @@ import javax.persistence.*
 @Table(name = "DESIRED_BUS_STOPS")
 data class DesiredBusStop (
         @Id @GeneratedValue(strategy = GenerationType.AUTO)
-        private val desiredBusStopId: Long = -1,
+        val desiredBusStopId: Long = -1,
 
-        val shortName : String,
+        val shortName: String,
 
-        val busNumber: Int,
+        val busNumber: String,
 
         internal val busStopUniqueId: String,
 
@@ -23,7 +23,7 @@ data class DesiredBusStop (
         @ManyToMany(mappedBy = "desiredBusStops")
         val users: List<User> = mutableListOf<User>()
         ) {
-    private constructor() : this(-1, "", 0, "", 0)
+    private constructor() : this(-1, "", "0", "", 0)
 
     override fun toString(): String {
             return String.format(

@@ -50,7 +50,7 @@ class ArrivalTimes(val cityBusHelper: CityBusHelper) {
         return map
     }
 
-    fun clearPreviousBusTimesForBusNumber(busNumber: Int){
+    fun clearPreviousBusTimesForBusNumber(busNumber: String){
         arrivalTimes.removeAll { it.isIsAnError }
         arrivalTimes.removeAll {it.busNumber == busNumber}
     }
@@ -101,7 +101,7 @@ class ArrivalTimes(val cityBusHelper: CityBusHelper) {
             }
             else {
                 this.clearPreviousBusTimesForBusNumber(chosenBusStop.busNumber)
-                this.addSeveral(mutableListOf(BusStopTime(-1, "Couldn't set BusStop", "")))
+                this.addSeveral(mutableListOf(BusStopTime("-1", "Couldn't set BusStop", "")))
                 logger.error("Error setting BusStopDetails : 200, but result is not OK : '${responseMap["body"]}'")
             }
         }
@@ -123,7 +123,7 @@ class ArrivalTimes(val cityBusHelper: CityBusHelper) {
         }
         else {
             this.clearPreviousBusTimesForBusNumber(chosenBusStop.busNumber)
-            this.addSeveral(mutableListOf(BusStopTime(0,"Couldn't set BusStop","${responseMap["statusCode"]}")))
+            this.addSeveral(mutableListOf(BusStopTime("0","Couldn't set BusStop","${responseMap["statusCode"]}")))
             logger.error("Unknown error setting BusStopDetails : code ${responseMap["statusCode"]} for ${chosenBusStop.busNumber}")
          }
     }

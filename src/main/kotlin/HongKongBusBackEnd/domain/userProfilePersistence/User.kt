@@ -7,6 +7,7 @@ import javax.persistence.*
 @Entity
 @Table(name = "USERS")
 data class User (
+        @Column(unique=true)
         val name: String,
 
         @Id
@@ -64,5 +65,9 @@ data class User (
             chosenBusStops.add(BusStopConfig(desiredBustStop.busNumber, desiredBustStop.busStopUniqueId, desiredBustStop.stopNumberOnBusLine))
         }
         return chosenBusStops
+    }
+
+    fun attachDesiredBusStop(desiredBusStop: DesiredBusStop) {
+        this.desiredBusStops.add(desiredBusStop)
     }
 }

@@ -1,7 +1,7 @@
 package HongKongBusBackEnd.domain.userSessions
 
 import HongKongBusBackEnd.domain.userProfilePersistence.User
-import HongKongBusBackEnd.infra.UserLoginEvenHandling.NewUserSessionEventBus
+import HongKongBusBackEnd.infra.UserLoginEventHandling.NewUserSessionEventBus
 import HongKongBusBackEnd.infra.bus.CityBusHelper
 import HongKongBusBackEnd.infra.userProfilePersistence.UserRepository
 import org.slf4j.LoggerFactory

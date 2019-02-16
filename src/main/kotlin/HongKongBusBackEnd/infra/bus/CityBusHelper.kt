@@ -112,7 +112,7 @@ class CityBusHelper {
         return answer
     }
 
-    fun getNextTimesForPreviouslySetBusStop(busStopNumber: Int): MutableList<BusStopTime> {
+    fun getNextTimesForPreviouslySetBusStop(busStopNumber: String): MutableList<BusStopTime> {
         val arrivalTimes = mutableListOf<BusStopTime>()
 
         val payload = mapOf("l" to "1", "ssid" to this.sessionId)
@@ -143,7 +143,7 @@ class CityBusHelper {
                 if (tableRowsNextbus_list.isNotEmpty()) {
                     val errorMessage = tableRowsNextbus_list[0].select("td")[0].text()
                     logger.warn(errorMessage)
-                    arrivalTimes.add(BusStopTime(-1, errorMessage,"-1"))
+                    arrivalTimes.add(BusStopTime("-1", errorMessage,"-1"))
                 }
                 else {
                     logger.warn("No reason found on CityBus website")
