@@ -76,7 +76,7 @@ def RefreshBusTimeData():
     # sessionIdWhichIKnowEqualsOne = "222"
     sessionIdWhichIKnowEqualsOne = requests.post(rootUrl + '/users/login', data={"userName": "pi"}).json()
     myLogger.info("Logged in as pi, sessionId = %s",sessionIdWhichIKnowEqualsOne)
-    answerToChangeConfigName = requests.post(rootUrl + '/sessions/changeConfigName', data={"sessionId": sessionIdWhichIKnowEqualsOne, "configName":"CastleDown"})
+    answerToChangeConfigName = requests.post(rootUrl + '/sessions/changeConfigName', data={"sessionId": sessionIdWhichIKnowEqualsOne, "configName":"CastleDown   🏰 👇"})
     if answerToChangeConfigName.status_code == 200:
         myLogger.info("%s : SUCCESS",answerToChangeConfigName)
     else:

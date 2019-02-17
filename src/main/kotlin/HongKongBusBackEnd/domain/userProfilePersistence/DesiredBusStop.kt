@@ -13,10 +13,6 @@ data class DesiredBusStop (
 
         val busNumber: String,
 
-        internal val busStopUniqueId: String,
-
-        val stopNumberOnBusLine: Int,
-
         val info_hkbus: String,
 
         //TODO add default config to load when user connects
@@ -25,10 +21,10 @@ data class DesiredBusStop (
         @ManyToMany(mappedBy = "desiredBusStops")
         val users: List<User> = mutableListOf<User>()
         ) {
-    private constructor() : this(-1, "", "0", "", 0, "")
+    private constructor() : this(-1, "", "0", "")
 
     override fun toString(): String {
             return String.format(
-                    "DesiredBusStop id=$desiredBusStopId : $busNumber-$busStopUniqueId-$stopNumberOnBusLine")
+                    "DesiredBusStop id=$desiredBusStopId : $busNumber - $info_hkbus")
         }
 }
