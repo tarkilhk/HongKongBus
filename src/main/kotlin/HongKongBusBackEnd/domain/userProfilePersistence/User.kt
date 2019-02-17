@@ -59,7 +59,7 @@ data class User (
         if (nameToQuery == "default") {
             //This happens when user logins, and doesn't specify a default config
             //TODO : load default config from DB instead, after isDefault has been implemented
-            nameToQuery = "CastleDown"
+            nameToQuery = "CastleDown   \uD83C\uDFF0 \uD83D\uDC47"
         }
         val desiredBusStops = this.desiredBusStops.filter { it.shortName == nameToQuery }.toMutableList()
         for (desiredBusStop in desiredBusStops) {

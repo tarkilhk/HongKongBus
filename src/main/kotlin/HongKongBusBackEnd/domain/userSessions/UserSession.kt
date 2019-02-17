@@ -17,6 +17,7 @@ class UserSession(val user : User, cityBusHelper: CityBusHelper) {
 
     fun changeConfig(newDesiredBusStopGroupName: String) {
         this.arrivalTimes.setToNotLoaded()
+        this.arrivalTimes.clearAll()
         this.busStopGroupName = newDesiredBusStopGroupName
         this.arrivalTimes.clearDesiredBusStops()
         this.arrivalTimes.addSeveralDesiredBusStop(user.getAllChosenBusStopsForGroup(newDesiredBusStopGroupName))
