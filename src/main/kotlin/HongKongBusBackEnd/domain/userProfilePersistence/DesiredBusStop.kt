@@ -17,13 +17,15 @@ data class DesiredBusStop (
 
         val stopNumberOnBusLine: Int,
 
+        val info_hkbus: String,
+
         //TODO add default config to load when user connects
 //        val isDefault : Boolean,
 
         @ManyToMany(mappedBy = "desiredBusStops")
         val users: List<User> = mutableListOf<User>()
         ) {
-    private constructor() : this(-1, "", "0", "", 0)
+    private constructor() : this(-1, "", "0", "", 0, "")
 
     override fun toString(): String {
             return String.format(

@@ -157,22 +157,6 @@ class CityBusHelper {
     }
 
     fun buildInfoString(chosenBusStop: BusStopConfig):String{
-        var busNumberTrigram = ""
-        when(chosenBusStop.busNumber){
-            "11" -> busNumberTrigram = "CEF"
-            "511" -> busNumberTrigram = "CEF"
-            "41A" -> busNumberTrigram = "WFC"
-            "63" -> busNumberTrigram = "CEF"
-            else -> busNumberTrigram = "XXX"
-        }
-        var bound = ""
-        when(chosenBusStop.busNumber){
-            "11" -> bound = "O"
-            "511" -> bound = "O"
-            "41A" -> bound = "I"
-            "63" -> bound = "I"
-            else -> bound = "I"
-        }
-        return "${chosenBusStop.busStopUniqueId}||${chosenBusStop.busNumber}-$busNumberTrigram-1||${chosenBusStop.stopNumberOnBusLine}||$bound"
+        return chosenBusStop.info_hkbus
     }
 }

@@ -47,7 +47,7 @@ data class User (
     {
         val chosenBusStops = mutableListOf<BusStopConfig>()
         for(desiredBustStop in desiredBusStops) {
-            chosenBusStops.add(BusStopConfig(desiredBustStop.busNumber,desiredBustStop.busStopUniqueId,desiredBustStop.stopNumberOnBusLine))
+            chosenBusStops.add(BusStopConfig(desiredBustStop.busNumber, desiredBustStop.info_hkbus))
         }
         return chosenBusStops
     }
@@ -62,8 +62,8 @@ data class User (
             nameToQuery = "CastleDown"
         }
         val desiredBusStops = this.desiredBusStops.filter { it.shortName == nameToQuery }.toMutableList()
-        for (desiredBustStop in desiredBusStops) {
-            chosenBusStops.add(BusStopConfig(desiredBustStop.busNumber, desiredBustStop.busStopUniqueId, desiredBustStop.stopNumberOnBusLine))
+        for (desiredBusStop in desiredBusStops) {
+            chosenBusStops.add(BusStopConfig(desiredBusStop.busNumber, desiredBusStop.info_hkbus))
         }
         return chosenBusStops
     }

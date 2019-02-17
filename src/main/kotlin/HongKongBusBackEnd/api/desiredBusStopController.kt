@@ -18,9 +18,10 @@ class desiredBusStopController(val sessionManager: UserSessionManager,val desire
                           @RequestParam(value="busNumber") busNumber: String,
                           @RequestParam(value="busStopUniqueId") busStopUniqueId: String,
                           @RequestParam(value="stopNumberOnBusLine") stopNumberOnBusLine: Int,
+                          @RequestParam(value="info") info: String,
                           @RequestParam(value="userNameList") userNameList: List<String>):String
     {
-        val newBusStop = desiredBusStopRepository.save(DesiredBusStop(shortName = shortName, busNumber=busNumber, busStopUniqueId=busStopUniqueId, stopNumberOnBusLine=stopNumberOnBusLine))
+        val newBusStop = desiredBusStopRepository.save(DesiredBusStop(shortName = shortName, busNumber=busNumber, busStopUniqueId=busStopUniqueId, stopNumberOnBusLine=stopNumberOnBusLine, info_hkbus = info))
 
         for(userName in userNameList){
             if(sessionManager.userRepository.existsByName(userName)) {
