@@ -143,7 +143,7 @@ class CityBusHelper {
                 if (tableRowsNextbus_list.isNotEmpty()) {
                     val errorMessage = tableRowsNextbus_list[0].select("td")[0].text()
                     logger.warn(errorMessage)
-                    arrivalTimes.add(BusStopTime(busStopNumber, errorMessage,"-1"))
+                    arrivalTimes.add(BusStopTime("-1", "$busStopNumber - $errorMessage","-1"))
                 }
                 else {
                     logger.warn("No reason found on CityBus website")

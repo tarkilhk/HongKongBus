@@ -16,8 +16,6 @@ class desiredBusStopController(val sessionManager: UserSessionManager,val desire
     @PostMapping("")
     fun newDesiredBusStop(@RequestParam(value="shortName") shortName: String,
                           @RequestParam(value="busNumber") busNumber: String,
-                          @RequestParam(value="busStopUniqueId") busStopUniqueId: String,
-                          @RequestParam(value="stopNumberOnBusLine") stopNumberOnBusLine: Int,
                           @RequestParam(value="info") info: String,
                           @RequestParam(value="userNameList") userNameList: List<String>):String
     {
