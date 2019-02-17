@@ -1,12 +1,12 @@
 class BusTimeToDisplay:
-    busNumber = 0
+    busNumber = '0'
     arrivalTime = ''
     distance = ''
     isAnError = False
     color = (0, 0, 0)
     arrivalTime24H = ''
 
-    def __init__(self, busNumber=0, arrivalTime='', distance='', isAnError=False, color=(0,0,0)):
+    def __init__(self, busNumber='0', arrivalTime='', distance='', isAnError=False, color=(0,0,0)):
         self.busNumber = busNumber
         self.arrivalTime = arrivalTime
         #If 00 is not found, then it seems like it returns an empty string !! ?????
@@ -17,7 +17,7 @@ class BusTimeToDisplay:
         self.color = color
         
     def __str__(self):
-        return "Bus " + str(self.busNumber) + " @ " + self.distance + " - " + self.arrivalTime
+        return "Bus " + self.busNumber + " @ " + self.distance + " - " + self.arrivalTime
     
     def __repr__(self):
-        return "Bus " + str(self.busNumber) + " @ " + self.distance + " - " + self.arrivalTime
+        return "Bus " + self.busNumber + " @ " + self.distance + " - " + self.arrivalTime

@@ -13,6 +13,7 @@ import BusTimeToDisplay
 # Define running folder
 if os.name == 'nt':
     ProgramFolder = 'C:\\Users\\rober\\ideaProjects\\HongKongBus\\src\\main\\HongKongBusPythonDisplay\\'
+    from Adafruit_RGBmatrix import Adafruit_RGBmatrix
 else:
     ProgramFolder = "/home/pi/Downloads/rpi-rgb-led-matrix-master/"
     from rgbmatrix import Adafruit_RGBmatrix
@@ -41,9 +42,9 @@ NextArrivalTimes = []
 
 def GetDisplayColor(busNumber):
     displayColor = (0, 0, 0)
-    if busNumber == 11 or busNumber == -1:
+    if busNumber == '11' or busNumber == '-1':
         displayColor = DarkRed
-    if busNumber == 511:
+    if busNumber == '511':
         displayColor = LightRed
     return displayColor
 
@@ -114,14 +115,14 @@ def RefreshBusTimeData():
                     myLogger.error("I don't know how to handle this exception : code %s, message %s", response.status_code, response.text)
         except requests.ConnectionError as err:
             FoundArrivalTimes.append(
-                BusTimeToDisplay.BusTimeToDisplay(0, 'OFFLN', 'OFFLN', DarkRed)
+                BusTimeToDisplay.BusTimeToDisplay('0', 'OFFLN', 'OFFLN', DarkRed)
             )
             myLogger.error('Connection error while refreshing BusTimeData')
             myLogger.exception(err)
             time.sleep(30)
         except requests.exceptions.Timeout as err:
             FoundArrivalTimes.append(
-                BusTimeToDisplay.BusTimeToDisplay(0, 'TMOUT', 'TMOUT', DarkRed)
+                BusTimeToDisplay.BusTimeToDisplay('0', 'TMOUT', 'TMOUT', DarkRed)
             )
             myLogger.error('Time out while refreshing BusTimeData')
             myLogger.exception(err)
@@ -259,7 +260,8 @@ def ThreadManager():
         if not myRefreshBusTimeDataThread.isAlive():
             myRefreshBusTimeDataThread.start()
             myLogger.info('ThreadManager : RefreshBusTimeData started')
-        if not myKeepDisplayUpdatedThread.isAlive() and os.name != 'nt':
+        # if not myKeepDisplayUpdatedThread.isAlive() and os.name != 'nt':
+        if not myKeepDisplayUpdatedThread.isAlive():
             myKeepDisplayUpdatedThread.start()
             myLogger.info('ThreadManager : KeepDisplayUpdated started')
         time.sleep(300)

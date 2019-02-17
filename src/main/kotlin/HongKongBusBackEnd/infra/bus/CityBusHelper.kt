@@ -102,7 +102,7 @@ class CityBusHelper {
     fun setBusStopDetailsAndGetResponseCode(chosenBusStop: BusStopConfig): MutableMap<String, String> {
         val answer : MutableMap<String, String> = mutableMapOf()
 
-        val payload = mapOf("ssid" to this.sessionId, "info" to "${chosenBusStop.busStopUniqueId}||${chosenBusStop.busNumber}-CEF-1||${chosenBusStop.stopNumberOnBusLine}||O")
+        val payload = mapOf("ssid" to this.sessionId, "info" to buildInfoString(chosenBusStop))
         logger.info("Before I try to set bus time for ${chosenBusStop.busNumber}")
         val response: Response = khttp.get("https://mobile.nwstbus.com.hk/nwp3/$urlOfSetBusStop", params = payload, cookies = this.cookies)
 
@@ -143,7 +143,7 @@ class CityBusHelper {
                 if (tableRowsNextbus_list.isNotEmpty()) {
                     val errorMessage = tableRowsNextbus_list[0].select("td")[0].text()
                     logger.warn(errorMessage)
-                    arrivalTimes.add(BusStopTime("-1", errorMessage,"-1"))
+                    arrivalTimes.add(BusStopTime(busStopNumber, errorMessage,"-1"))
                 }
                 else {
                     logger.warn("No reason found on CityBus website")
@@ -154,5 +154,25 @@ class CityBusHelper {
             logger.error("Failed at retrieving GetBusStopETA [${response.statusCode}] : ${response.text}")
         }
         return (arrivalTimes)
+    }
+
+    fun buildInfoString(chosenBusStop: BusStopConfig):String{
+        var busNumberTrigram = ""
+        when(chosenBusStop.busNumber){
+            "11" -> busNumberTrigram = "CEF"
+            "511" -> busNumberTrigram = "CEF"
+            "41A" -> busNumberTrigram = "WFC"
+            "63" -> busNumberTrigram = "CEF"
+            else -> busNumberTrigram = "XXX"
+        }
+        var bound = ""
+        when(chosenBusStop.busNumber){
+            "11" -> bound = "O"
+            "511" -> bound = "O"
+            "41A" -> bound = "I"
+            "63" -> bound = "I"
+            else -> bound = "I"
+        }
+        return "${chosenBusStop.busStopUniqueId}||${chosenBusStop.busNumber}-$busNumberTrigram-1||${chosenBusStop.stopNumberOnBusLine}||$bound"
     }
 }
