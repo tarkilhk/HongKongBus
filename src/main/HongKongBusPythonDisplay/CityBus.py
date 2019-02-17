@@ -1,3 +1,5 @@
+# -*- coding: UTF-8 -*-
+
 import requests
 import sys, os
 from PIL import ImageFont
@@ -106,7 +108,7 @@ def RefreshBusTimeData():
                     else:
                         myLogger.info("Successfully re logged in as pi")
                         myLogger.info("I will try to change my configBusName to CastleDown")
-                        responseBis = requests.post(rootUrl + '/sessions/changeConfigName', data={"sessionId": sessionIdWhichIKnowEqualsOne, "configName":"CastleDown"})
+                        responseBis = requests.post(rootUrl + '/sessions/changeConfigName', data={"sessionId": sessionIdWhichIKnowEqualsOne, "configName":"CastleDown   🏰 👇"})
                         if responseBis.status_code != 200 :
                             myLogger.error("Couldn't change busConfigName after relogging in : status = %s, message = ", responseBis.status_code, responseBis.text)
                         else:
