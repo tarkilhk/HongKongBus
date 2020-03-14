@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class CityBusHelper {
-    private val logger = LoggerFactory.getLogger(this.javaClass)
+    private val log = LoggerFactory.getLogger(this.javaClass)
     private var urlOfSetBusStop = ""
     private var urlOfGetBusStopETA = ""
     private var cookies : MutableMap<String, String> = mutableMapOf()
@@ -19,7 +19,12 @@ class CityBusHelper {
     private val sysIDManager : SysIDManager = SysIDManager()
 
     init{
-        logger.info("Initialising CityBusHelper Service")
+        log.info("Initialising CityBusHelper Service")
+        reinitialiseSession()
+    }
+
+    private fun reinitialiseSession(){
+        log.info("Recreating a fresh session")
         loadFirstWebPageAndSaveCookies()
         loadSetGetURLsFromFB()
     }
@@ -30,7 +35,7 @@ class CityBusHelper {
 
         val response: Response = khttp.get("https://mobile.nwstbus.com.hk/nwp3/?f=1&ds=ETA&l=1",timeout=60.0)
         if(response.statusCode == 200) {
-            logger.info("Retrieved cookies succesfully from landing page")
+            log.info("Retrieved cookies succesfully from landing page")
             val myOwnCookies = mutableMapOf("PPFARE" to "1")
 
             for (myCookie in response.cookies) {
@@ -48,12 +53,12 @@ class CityBusHelper {
                 }
             }
             if(counterForUnmanagedCookieKeys > 1) {
-                logger.error("The cookies have changed in the landing webpage, I have now 1 more field that I don't know about : it needs to be excluded")
+                log.error("The cookies have changed in the landing webpage, I have now 1 more field that I don't know about : it needs to be excluded")
             }
             this.cookies = myOwnCookies
         }
         else {
-            logger.error("Failed at retrieving cookies from landing page [${response.statusCode}] : ${response.text}")
+            log.error("Failed at retrieving cookies from landing page [${response.statusCode}] : ${response.text}")
         }
     }
 
@@ -68,7 +73,7 @@ class CityBusHelper {
         val response: Response = khttp.get("https://mobile.nwstbus.com.hk/nwp3/fb.php", params = payload, cookies = this.cookies)
 
         if(response.statusCode == 200) {
-            logger.info("Retrieved fb.php content successfully")
+            log.info("Retrieved fb.php content successfully")
             val message: String = response.text.replace(" ", "")
             val myCleanedLines = message.lines().dropWhile { it.startsWith("//") }
             for (line in myCleanedLines) {
@@ -98,13 +103,13 @@ class CityBusHelper {
             }
         }
         else {
-            logger.error("Failed at retrieving SetGet URLs in fb.php [${response.statusCode}] : ${response.text}")
+            log.error("Failed at retrieving SetGet URLs in fb.php [${response.statusCode}] : ${response.text}")
         }
         if(!foundGetURL) {
-            logger.error("Couldn't find GET URL in fb.php")
+            log.error("Couldn't find GET URL in fb.php")
         }
         if(!foundSetURL) {
-            logger.error("Couldn't find SET URL in fb.php")
+            log.error("Couldn't find SET URL in fb.php")
         }
     }
 
@@ -112,7 +117,7 @@ class CityBusHelper {
         val answer : MutableMap<String, String> = mutableMapOf()
 
         val payload = mapOf("ssid" to this.sessionId, "info" to buildInfoString(chosenBusStop))
-        logger.info("Before I try to set bus time for ${chosenBusStop.busNumber}")
+        log.info("Before I try to set bus time for ${chosenBusStop.busNumber}")
         val response: Response = khttp.get("https://mobile.nwstbus.com.hk/nwp3/$urlOfSetBusStop", params = payload, cookies = this.cookies)
 
         answer["statusCode"] = response.statusCode.toString()
@@ -130,29 +135,36 @@ class CityBusHelper {
         // I need to checkCall first
         val responseCheckCall: Response = khttp.get("https://mobile.nwstbus.com.hk/nwp3/checkCall.php", params = mapOf("type" to "ETA", "ssid" to this.sessionId, "sysid" to this.sysIDManager.getNextValidSysID()), cookies = this.cookies)
         if(responseCheckCall.statusCode == 200) {
-            logger.info("Retrieved checkCall content successfully")
+            log.info("Retrieved checkCall content successfully")
             val bodyCheckCall: String = responseCheckCall.text
             val resultingDocumentCheckCall: Document = Jsoup.parse(bodyCheckCall)
-            val onloadProperty = resultingDocumentCheckCall.select("[onload^=makeRequest]").attr("onload").toString()
-            val (URLCheckSuccess, params) = onloadProperty.split('"')[1].split("?")
+            val onloadMakeRequest = resultingDocumentCheckCall.select("[onload^=makeRequest]").attr("onload").toString()
+            if (onloadMakeRequest.isNotEmpty()) {
+                val (URLCheckSuccess, params) = onloadMakeRequest.split('"')[1].split("?")
+                payLoadCheckSuccess.put("sysid", this.sysIDManager.getNextValidSysID())
+                params.split("&").forEach{
+                    payLoadCheckSuccess.put(it.split("=")[0],it.split("=")[1])
+                }
 
-            payLoadCheckSuccess.put("sysid", this.sysIDManager.getNextValidSysID())
-            params.split("&").forEach{
-                payLoadCheckSuccess.put(it.split("=")[0],it.split("=")[1])
+                // Now I need to checkSuccess
+                responseCheckSuccess = khttp.get("https://mobile.nwstbus.com.hk/nwp3/" + URLCheckSuccess, params = payLoadCheckSuccess, cookies = this.cookies)
+                if(responseCheckSuccess.statusCode == 200) {
+                    log.info("Retrieved checkSuccess content successfully")
+                }
+                else {
+                    log.error("Could not Check Success - status [" + responseCheckSuccess.statusCode + "] : " + responseCheckSuccess.text)
+                }
             }
-
-
-            // Now I need to checkSuccess
-            responseCheckSuccess = khttp.get("https://mobile.nwstbus.com.hk/nwp3/" + URLCheckSuccess, params = payLoadCheckSuccess, cookies = this.cookies)
-            if(responseCheckSuccess.statusCode == 200) {
-                logger.info("Retrieved checkSuccess content successfully")
-            }
-            else {
-                logger.error("Could not Check Success - status [" + responseCheckSuccess.statusCode + "] : " + responseCheckSuccess.text)
+            else{
+                log.warn("Couldn't find 'makeRequest' property in the CheckCall call - body = " + responseCheckCall.text)
+                // This means that the website is asking for some captcha identification
+                // I will restart from new session
+                this.reinitialiseSession()
+                return mutableListOf<BusStopTime>()
             }
         }
         else {
-            logger.error("Could not Check Call - status [" + responseCheckCall.statusCode + "] : " + responseCheckCall.text)
+            log.error("Could not Check Call - status [" + responseCheckCall.statusCode + "] : " + responseCheckCall.text)
         }
 
         // Now I can get the ETA
@@ -161,7 +173,7 @@ class CityBusHelper {
 
         val response: Response = khttp.get("https://mobile.nwstbus.com.hk/nwp3/$urlOfGetBusStopETA", params = payload, cookies = this.cookies)
         if(response.statusCode == 200) {
-            logger.info("Retrieved GetBusStopETA content successfully")
+            log.info("Retrieved GetBusStopETA content successfully")
 
             val message: String = response.text
 
@@ -176,24 +188,24 @@ class CityBusHelper {
                         arrivalTimes.add(BusStopTime(busStopNumber, myCells.elementAt(0).text(), myCells.elementAt(2).text()))
                     } else {
                         //table found but no 3 td in it ?
-                        logger.error("GetBusStopETA is successful, contains a table, but cells don't follow expected format for bus $busStopNumber")
+                        log.error("GetBusStopETA is successful, contains a table, but cells don't follow expected format for bus $busStopNumber")
                     }
                 }
             } else {
                 //No bus found
-                logger.warn("GetBusStopETA is successful, but no Table Rows for bus $busStopNumber")
+                log.warn("GetBusStopETA is successful, but no Table Rows for bus $busStopNumber")
                 if (tableRowsNextbus_list.isNotEmpty()) {
                     val errorMessage = tableRowsNextbus_list[0].select("td")[0].text()
-                    logger.warn(errorMessage)
+                    log.warn(errorMessage)
                     arrivalTimes.add(BusStopTime("-1", "$busStopNumber - $errorMessage","-1"))
                 }
                 else {
-                    logger.warn("No reason found on CityBus website")
+                    log.warn("No reason found on CityBus website")
                 }
             }
         }
         else {
-            logger.error("Failed at retrieving GetBusStopETA [${response.statusCode}] : ${response.text}")
+            log.error("Failed at retrieving GetBusStopETA [${response.statusCode}] : ${response.text}")
         }
         return (arrivalTimes)
     }
