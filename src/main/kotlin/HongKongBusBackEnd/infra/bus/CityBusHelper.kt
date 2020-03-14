@@ -160,6 +160,7 @@ class CityBusHelper {
                 // This means that the website is asking for some captcha identification
                 // I will restart from new session
                 this.reinitialiseSession()
+                log.info("Reinitialised my session, returning empty result, and hoping for best luck on next loop")
                 return mutableListOf<BusStopTime>()
             }
         }
@@ -207,6 +208,7 @@ class CityBusHelper {
         else {
             log.error("Failed at retrieving GetBusStopETA [${response.statusCode}] : ${response.text}")
         }
+        log.info("All good, going to return the newly found arrival times now")
         return (arrivalTimes)
     }
 
