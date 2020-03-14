@@ -16,6 +16,7 @@ class CityBusHelper {
     private var urlOfGetBusStopETA = ""
     private var cookies : MutableMap<String, String> = mutableMapOf()
     private var sessionId : String = ""
+    private val sysIDManager : SysIDManager = SysIDManager()
 
     init{
         logger.info("Initialising CityBusHelper Service")
@@ -24,6 +25,9 @@ class CityBusHelper {
     }
 
     final fun loadFirstWebPageAndSaveCookies() {
+        this.sysIDManager.resetSysId()
+        var counterForUnmanagedCookieKeys = 0
+
         val response: Response = khttp.get("https://mobile.nwstbus.com.hk/nwp3/?f=1&ds=ETA&l=1",timeout=60.0)
         if(response.statusCode == 200) {
             logger.info("Retrieved cookies succesfully from landing page")
@@ -35,11 +39,16 @@ class CityBusHelper {
                     "PHPSESSID" -> myOwnCookies["PHPSESSID"] = myCookie.value.split(";")[0]
                     "PPFARE" -> myOwnCookies["PPFARE"] = myCookie.value.split(";")[0]
                     "LANG" -> myOwnCookies["LANG"] = myCookie.value.split(";")[0]
+                    "QRSTOP" -> {}
                     else -> { // Note the block
+                        counterForUnmanagedCookieKeys = counterForUnmanagedCookieKeys + 1
                         myOwnCookies[myCookie.key] = myCookie.value.split(";")[0]
                         this.sessionId = myCookie.key
                     }
                 }
+            }
+            if(counterForUnmanagedCookieKeys > 1) {
+                logger.error("The cookies have changed in the landing webpage, I have now 1 more field that I don't know about : it needs to be excluded")
             }
             this.cookies = myOwnCookies
         }
@@ -115,7 +124,40 @@ class CityBusHelper {
     fun getNextTimesForPreviouslySetBusStop(busStopNumber: String): MutableList<BusStopTime> {
         val arrivalTimes = mutableListOf<BusStopTime>()
 
-        val payload = mapOf("l" to "1", "ssid" to this.sessionId)
+        val responseCheckSuccess: Response
+        val payLoadCheckSuccess = mutableMapOf("ssid" to this.sessionId)
+
+        // I need to checkCall first
+        val responseCheckCall: Response = khttp.get("https://mobile.nwstbus.com.hk/nwp3/checkCall.php", params = mapOf("type" to "ETA", "ssid" to this.sessionId, "sysid" to this.sysIDManager.getNextValidSysID()), cookies = this.cookies)
+        if(responseCheckCall.statusCode == 200) {
+            logger.info("Retrieved checkCall content successfully")
+            val bodyCheckCall: String = responseCheckCall.text
+            val resultingDocumentCheckCall: Document = Jsoup.parse(bodyCheckCall)
+            val onloadProperty = resultingDocumentCheckCall.select("[onload^=makeRequest]").attr("onload").toString()
+            val (URLCheckSuccess, params) = onloadProperty.split('"')[1].split("?")
+
+            payLoadCheckSuccess.put("sysid", this.sysIDManager.getNextValidSysID())
+            params.split("&").forEach{
+                payLoadCheckSuccess.put(it.split("=")[0],it.split("=")[1])
+            }
+
+
+            // Now I need to checkSuccess
+            responseCheckSuccess = khttp.get("https://mobile.nwstbus.com.hk/nwp3/" + URLCheckSuccess, params = payLoadCheckSuccess, cookies = this.cookies)
+            if(responseCheckSuccess.statusCode == 200) {
+                logger.info("Retrieved checkSuccess content successfully")
+            }
+            else {
+                logger.error("Could not Check Success - status [" + responseCheckSuccess.statusCode + "] : " + responseCheckSuccess.text)
+            }
+        }
+        else {
+            logger.error("Could not Check Call - status [" + responseCheckCall.statusCode + "] : " + responseCheckCall.text)
+        }
+
+        // Now I can get the ETA
+
+        val payload = mapOf("l" to "1", "ssid" to this.sessionId, "sysid" to this.sysIDManager.getNextNextValidSysID())
 
         val response: Response = khttp.get("https://mobile.nwstbus.com.hk/nwp3/$urlOfGetBusStopETA", params = payload, cookies = this.cookies)
         if(response.statusCode == 200) {

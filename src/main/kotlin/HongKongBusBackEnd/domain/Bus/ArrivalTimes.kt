@@ -17,6 +17,7 @@ class ArrivalTimes(val cityBusHelper: CityBusHelper) {
     private var lastRefreshTime = LocalDateTime.now(ZoneId.of("Asia/Hong_Kong")).format(DateTimeFormatter.ofPattern("HH:mm:ss"))
 
     private var IAlreadyHadA404ErrorAndImInMyRecursiveLoopToTryToFixIt = false
+    private var IAlreadyHadADoubleColonErrorAndImInMyRecursiveLoopToTryToFixIt = false
 
     fun clearDesiredBusStops() {
         chosenBusStops.clear()
@@ -96,8 +97,15 @@ class ArrivalTimes(val cityBusHelper: CityBusHelper) {
                 lastRefreshTime = LocalDateTime.now(ZoneId.of("Asia/Hong_Kong")).format(DateTimeFormatter.ofPattern("HH:mm:ss"))
             }
             else if (responseMap["body"].equals("::")) {
-                cityBusHelper.loadFirstWebPageAndSaveCookies()
-                cityBusHelper.loadSetGetURLsFromFB()
+                if(this.IAlreadyHadADoubleColonErrorAndImInMyRecursiveLoopToTryToFixIt) {
+                    logger.error("I cannot set relevant bus stop details, something must have changed in the cookies, or in the payload I have to send")
+                }
+                else {
+                    this.IAlreadyHadADoubleColonErrorAndImInMyRecursiveLoopToTryToFixIt = true
+                    logger.warn("I'm expecting to receive 'OK' answer when posting the payload to set relevant bus stop details, but I didn't : I will retry to renew my cookies + URLs")
+                    cityBusHelper.loadFirstWebPageAndSaveCookies()
+                    cityBusHelper.loadSetGetURLsFromFB()
+                }
             }
             else {
                 this.clearPreviousBusTimesForBusNumber(chosenBusStop.busNumber)
