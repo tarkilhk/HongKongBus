@@ -130,7 +130,7 @@ class CityBusHelper {
         val arrivalTimes = mutableListOf<BusStopTime>()
 
         val responseCheckSuccess: Response
-        val payLoadCheckSuccess = mutableMapOf("ssid" to this.sessionId)
+        val payLoadCheckSuccess : MutableMap<String, String> = mutableMapOf()
 
         // I need to checkCall first
         val responseCheckCall: Response = khttp.get("https://mobile.nwstbus.com.hk/nwp3/checkCall.php", params = mapOf("type" to "ETA", "ssid" to this.sessionId, "sysid" to this.sysIDManager.getNextValidSysID()), cookies = this.cookies)
@@ -139,8 +139,10 @@ class CityBusHelper {
             val bodyCheckCall: String = responseCheckCall.text
             val resultingDocumentCheckCall: Document = Jsoup.parse(bodyCheckCall)
             val onloadMakeRequest = resultingDocumentCheckCall.select("[onload^=makeRequest]").attr("onload").toString()
+
             if (onloadMakeRequest.isNotEmpty()) {
                 val (URLCheckSuccess, params) = onloadMakeRequest.split('"')[1].split("?")
+                payLoadCheckSuccess.put("ssid", this.sessionId)
                 payLoadCheckSuccess.put("sysid", this.sysIDManager.getNextValidSysID())
                 params.split("&").forEach{
                     payLoadCheckSuccess.put(it.split("=")[0],it.split("=")[1])
@@ -158,11 +160,40 @@ class CityBusHelper {
             else{
                 log.warn("Couldn't find 'makeRequest' property in the CheckCall call - body = " + responseCheckCall.text)
                 // This means that the website is asking for some captcha identification
+
+                //// New session doesn't work
                 // I will restart from new session
-                this.reinitialiseSession()
-                log.info("Reinitialised my session, returning empty result, and hoping for best luck on next loop")
-                return mutableListOf<BusStopTime>()
+//                this.reinitialiseSession()
+//                log.info("Reinitialised my session, returning empty result, and hoping for best luck on next loop")
+//                return mutableListOf<BusStopTime>()
+
+                log.info("Let's try to deal with the Google recaptcha")
+
+                val onloadRecaptchaType = resultingDocumentCheckCall.select("[onload^=recaptcha_type]").attr("onload").toString()
+                val onloadRecaptchaKey = resultingDocumentCheckCall.select("[onload^=recaptcha_key]").attr("onload").toString()
+
+                var (recaptcha_typeKey, recaptcha_typeValue) = onloadRecaptchaType.split(";")[0].split('=')
+                var (recaptcha_keyKey, recaptcha_keyValue) = onloadRecaptchaKey.split(";")[0].split('=')
+
+                recaptcha_typeValue = recaptcha_typeValue.replace("\"", "")
+                recaptcha_keyValue = recaptcha_keyValue.replace("\"","").replace(" ", "")
+
+                val URLCheckSuccessToCallForRecaptcha = "https://mobile.nwstbus.com.hk/nwp3/checkSuccess.php"
+                payLoadCheckSuccess.put("ssid", this.sessionId)
+                payLoadCheckSuccess.put("sysid", this.sysIDManager.getNextValidSysID())
+                payLoadCheckSuccess.put("type", recaptcha_typeValue)
+                payLoadCheckSuccess.put("checkValue", recaptcha_keyValue)
+                payLoadCheckSuccess.put("success", "Y")
+
+                responseCheckSuccess = khttp.get(URLCheckSuccessToCallForRecaptcha, params = payLoadCheckSuccess, cookies = this.cookies)
+                if(responseCheckSuccess.statusCode == 200) {
+                    log.info("Sent the ReCaptcha details to checkSuccess successfully")
+                }
+                else {
+                    log.error("Could not send the ReCaptcha details to checkSuccess - status [" + responseCheckSuccess.statusCode + "] : " + responseCheckSuccess.text)
+                }
             }
+
         }
         else {
             log.error("Could not Check Call - status [" + responseCheckCall.statusCode + "] : " + responseCheckCall.text)
@@ -197,7 +228,7 @@ class CityBusHelper {
                 log.warn("GetBusStopETA is successful, but no Table Rows for bus $busStopNumber")
                 if (tableRowsNextbus_list.isNotEmpty()) {
                     val errorMessage = tableRowsNextbus_list[0].select("td")[0].text()
-                    log.warn(errorMessage)
+                    log.error(errorMessage)
                     arrivalTimes.add(BusStopTime("-1", "$busStopNumber - $errorMessage","-1"))
                 }
                 else {
@@ -208,7 +239,7 @@ class CityBusHelper {
         else {
             log.error("Failed at retrieving GetBusStopETA [${response.statusCode}] : ${response.text}")
         }
-        log.info("All good, going to return the newly found arrival times now")
+        log.info("End of getNextTimesForPreviouslySetBusStop : going to return the newly found arrival times now")
         return (arrivalTimes)
     }
 
